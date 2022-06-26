@@ -1,5 +1,6 @@
 import Vapor
 import telegram_vapor_bot
+import Schedule
 
 final class DefaultBotHandlers {
 
@@ -11,17 +12,20 @@ final class DefaultBotHandlers {
         usersRepository: UsersRepository
     ) {
         self.usersRepository = usersRepository
+        self.bot = bot
 
         setupDefaultHandler(app: app, bot: bot)
         setupStartHandler(app: app, bot: bot)
 
         commandShowButtonsHandler(app: app, bot: bot)
         buttonsActionHandler(app: app, bot: bot)
+
+        setupActivities()
     }
 
     // MARK: - Internal methods
 
-    /// add handler for all messages unless command "/ping"
+    /// add handler for all messages unless command "/start"
     private static func setupDefaultHandler(app: Vapor.Application, bot: TGBotPrtcl) {
         let handler = TGMessageHandler(filters: (.all && !.command.names([Commands.start]))) { update, bot in
             let params: TGSendMessageParams = .init(chatId: .chat(update.message!.chat.id), text: "Success")
@@ -31,7 +35,7 @@ final class DefaultBotHandlers {
         bot.connection.dispatcher.add(handler)
     }
 
-    /// add handler for all messages unless command "/ping"
+    /// add handler for command "/start"
     private static func setupStartHandler(app: Vapor.Application, bot: TGBotPrtcl) {
         let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
             let userId = "\(update.message!.chat.id)"
@@ -39,7 +43,7 @@ final class DefaultBotHandlers {
 
             let userToRegister = User(withId: userId, registeredAtTimestamp: registeredAtTimestamp)
 
-            Task {
+            _Concurrency.Task {
                 await usersRepository?.registerUser(userToRegister)
             }
         }
@@ -88,9 +92,78 @@ final class DefaultBotHandlers {
         bot.connection.dispatcher.add(handler2)
     }
 
+    private static func setupActivities() {
+        setupDailyActivities()
+    }
+
+    private static func setupDailyActivities() {
+        dailyMorningActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("10:00")
+            .do(queue: .global()) {
+            handleDailyMorningActivity()
+        }
+
+        dailyLunchActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("14:00")
+            .do(queue: .global()) {
+            handleDailyLunchActivity()
+        }
+
+        dailyEveningActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("19:00")
+            .do(queue: .global()) {
+            handleDailyEveningActivity()
+        }
+
+        dailyReportTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("22:00")
+            .do(queue: .global()) {
+            handleDailyReport()
+        }
+    }
+
+    private static func handleDailyMorningActivity() {
+        _Concurrency.Task {
+            let registeredUsers = await usersRepository!.loadUsers()
+
+            for user in registeredUsers {
+                if let chatId = Int64(user.id) {
+                    let message = TGSendMessageParams(
+                        chatId: .chat(chatId),
+                        text: "Good morning"
+                    )
+
+                    _ = try? bot?.sendMessage(params: message)
+                }
+            }
+        }
+    }
+
+    private static func handleDailyLunchActivity() {
+
+    }
+
+    private static func handleDailyEveningActivity() {
+
+    }
+
+    private static func handleDailyReport() {
+
+    }
+
     // MARK: - Internal fields
 
     private static var usersRepository: UsersRepository?
+    private static var bot: TGBotPrtcl?
+
+    private static var dailyMorningActivityTask: Schedule.Task!
+    private static var dailyLunchActivityTask: Schedule.Task!
+    private static var dailyEveningActivityTask: Schedule.Task!
+    private static var dailyReportTask: Schedule.Task!
 
     private enum Commands {
         static let start = "/start"

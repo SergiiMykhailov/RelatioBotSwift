@@ -15,7 +15,7 @@ class SQLiteUsersRepository : UsersRepository {
 
         do {
             try connection.run(
-                table.insert(or: .replace, idColumn <- user.id, registeredAtColumn <- user.registeredAtTimestamp)
+                table.insert(or: .rollback, idColumn <- user.id, registeredAtColumn <- user.registeredAtTimestamp)
             )
 
             return true
