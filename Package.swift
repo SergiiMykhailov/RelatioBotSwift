@@ -10,17 +10,18 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
         .package(
-            name: "telegram-vapor-bot",
             url: "https://github.com/nerzh/telegram-vapor-bot",
             .upToNextMajor(from: "1.0.2")
-        )
+        ),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3")
     ],
     targets: [
         .target(
             name: "App",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
-                .product(name: "telegram-vapor-bot", package: "telegram-vapor-bot")
+                .product(name: "telegram-vapor-bot", package: "telegram-vapor-bot"),
+                .product(name: "SQLite", package: "SQLite.swift")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
