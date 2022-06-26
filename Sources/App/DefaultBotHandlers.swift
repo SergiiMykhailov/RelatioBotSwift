@@ -3,27 +3,47 @@ import telegram_vapor_bot
 
 final class DefaultBotHandlers {
 
-    static func addHandlers(app: Vapor.Application, bot: TGBotPrtcl) {
-        defaultHandler(app: app, bot: bot)
-        commandPingHandler(app: app, bot: bot)
+    // MARK: - Public methods and properties
+
+    public static func addHandlers(
+        app: Vapor.Application,
+        bot: TGBotPrtcl,
+        usersRepository: UsersRepository
+    ) {
+        self.usersRepository = usersRepository
+
+        setupDefaultHandler(app: app, bot: bot)
+        setupStartHandler(app: app, bot: bot)
+
         commandShowButtonsHandler(app: app, bot: bot)
         buttonsActionHandler(app: app, bot: bot)
     }
 
+    // MARK: - Internal methods
+
     /// add handler for all messages unless command "/ping"
-    private static func defaultHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGMessageHandler(filters: (.all && !.command.names(["/ping"]))) { update, bot in
+    private static func setupDefaultHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGMessageHandler(filters: (.all && !.command.names([Commands.start]))) { update, bot in
             let params: TGSendMessageParams = .init(chatId: .chat(update.message!.chat.id), text: "Success")
             try bot.sendMessage(params: params)
         }
+
         bot.connection.dispatcher.add(handler)
     }
 
-    /// add handler for command "/ping"
-    private static func commandPingHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: ["/ping"]) { update, bot in
-            try update.message?.reply(text: "pong", bot: bot)
+    /// add handler for all messages unless command "/ping"
+    private static func setupStartHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+            let userId = "\(update.message!.chat.id)"
+            let registeredAtTimestamp = Int(Date().timeIntervalSince1970)
+
+            let userToRegister = User(withId: userId, registeredAtTimestamp: registeredAtTimestamp)
+
+            Task {
+                await usersRepository?.registerUser(userToRegister)
+            }
         }
+
         bot.connection.dispatcher.add(handler)
     }
 
@@ -40,6 +60,7 @@ final class DefaultBotHandlers {
                                                     replyMarkup: .inlineKeyboardMarkup(keyboard))
             try bot.sendMessage(params: params)
         }
+
         bot.connection.dispatcher.add(handler)
     }
 
@@ -65,5 +86,13 @@ final class DefaultBotHandlers {
 
         bot.connection.dispatcher.add(handler)
         bot.connection.dispatcher.add(handler2)
+    }
+
+    // MARK: - Internal fields
+
+    private static var usersRepository: UsersRepository?
+
+    private enum Commands {
+        static let start = "/start"
     }
 }
