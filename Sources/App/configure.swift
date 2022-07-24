@@ -18,16 +18,16 @@ func setupBot(_ app: Application) throws {
     /// set level of debug if you needed
     TGBot.log.logLevel = .error
 
-    DefaultBotHandlers.addHandlers(
-        app: app,
-        bot: TGBot.shared,
-        usersRepository: SQLiteUsersRepository(
-            withConnection: SQLiteDefaultConnectionProvider.instance.connection
-        ),
-        activitiesRepository: SQLiteActivitiesRepository(
-            withConnection: SQLiteDefaultConnectionProvider.instance.connection
-        )
-    )
+//    DefaultBotHandlers.addHandlers(
+//        app: app,
+//        bot: TGBot.shared,
+//        usersRepository: SQLiteUsersRepository(
+//            withConnection: SQLiteDefaultConnectionProvider.instance.connection
+//        ),
+//        activitiesRepository: SQLiteActivitiesRepository(
+//            withConnection: SQLiteDefaultConnectionProvider.instance.connection
+//        )
+//    )
 
     // register routes
     try routes(app)
