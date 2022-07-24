@@ -13,10 +13,10 @@ let package = Package(
             url: "https://github.com/nerzh/telegram-vapor-bot",
             .upToNextMajor(from: "1.0.2")
         ),
-//        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
-//        .package(
-//            url: "https://github.com/luoxiu/Schedule", .upToNextMajor(from: "2.0.0")
-//        )
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
+        .package(
+            url: "https://github.com/luoxiu/Schedule", .upToNextMajor(from: "2.0.0")
+        )
     ],
     targets: [
         .target(
@@ -24,8 +24,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "telegram-vapor-bot", package: "telegram-vapor-bot"),
-//                .product(name: "SQLite", package: "SQLite.swift"),
-//                .product(name: "Schedule", package: "Schedule")
+                .product(name: "SQLite", package: "SQLite.swift"),
+                .product(name: "Schedule", package: "Schedule")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of

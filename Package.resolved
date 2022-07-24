@@ -46,6 +46,24 @@
       }
     },
     {
+      "identity" : "schedule",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/luoxiu/Schedule",
+      "state" : {
+        "revision" : "e388fcab1d870f32c0359a414fda81b8e81b98c9",
+        "version" : "2.1.1"
+      }
+    },
+    {
+      "identity" : "sqlite.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stephencelis/SQLite.swift.git",
+      "state" : {
+        "revision" : "4d543d811ee644fa4cc4bfa0be996b4dd6ba0f54",
+        "version" : "0.13.3"
+      }
+    },
+    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms.git",

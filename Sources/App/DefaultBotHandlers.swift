@@ -1,7 +1,7 @@
 import Vapor
 import telegram_vapor_bot
-//import Schedule
-//import SQLite
+import Schedule
+import SQLite
 
 final class DefaultBotHandlers {
 
@@ -175,33 +175,33 @@ final class DefaultBotHandlers {
     }
 
     private static func setupDailyActivities() {
-//        dailyMorningActivityTask = Plan.every(
-//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-//            .at("10:00")
-//            .do(queue: .global()) {
-//            handleDailyMorningActivity()
-//        }
-//
-//        dailyLunchActivityTask = Plan.every(
-//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-//            .at("14:00")
-//            .do(queue: .global()) {
-//            handleDailyLunchActivity()
-//        }
-//
-//        dailyEveningActivityTask = Plan.every(
-//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-//            .at("19:00")
-//            .do(queue: .global()) {
-//            handleDailyEveningActivity()
-//        }
-//
-//        dailyReportTask = Plan.every(
-//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-//            .at("22:00")
-//            .do(queue: .global()) {
-//            handleDailyReport()
-//        }
+        dailyMorningActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("10:00")
+            .do(queue: .global()) {
+            handleDailyMorningActivity()
+        }
+
+        dailyLunchActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("14:00")
+            .do(queue: .global()) {
+            handleDailyLunchActivity()
+        }
+
+        dailyEveningActivityTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("19:00")
+            .do(queue: .global()) {
+            handleDailyEveningActivity()
+        }
+
+        dailyReportTask = Plan.every(
+            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+            .at("22:00")
+            .do(queue: .global()) {
+            handleDailyReport()
+        }
     }
 
     private static func handleDailyMorningActivity() {
@@ -339,10 +339,10 @@ final class DefaultBotHandlers {
     private static var activitiesRepository: ActivitiesRepository?
     private static var bot: TGBotPrtcl?
 
-//    private static var dailyMorningActivityTask: Schedule.Task!
-//    private static var dailyLunchActivityTask: Schedule.Task!
-//    private static var dailyEveningActivityTask: Schedule.Task!
-//    private static var dailyReportTask: Schedule.Task!
+    private static var dailyMorningActivityTask: Schedule.Task!
+    private static var dailyLunchActivityTask: Schedule.Task!
+    private static var dailyEveningActivityTask: Schedule.Task!
+    private static var dailyReportTask: Schedule.Task!
 
     private enum Commands {
         static let start = "/start"
