@@ -23,6 +23,9 @@ func setupBot(_ app: Application) throws {
         bot: TGBot.shared,
         usersRepository: SQLiteUsersRepository(
             withConnection: SQLiteDefaultConnectionProvider.instance.connection
+        ),
+        activitiesRepository: SQLiteActivitiesRepository(
+            withConnection: SQLiteDefaultConnectionProvider.instance.connection
         )
     )
 

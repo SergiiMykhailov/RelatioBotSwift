@@ -1,6 +1,6 @@
 import SQLite
 
-class SQLiteUsersRepository : UsersRepository {
+class SQLiteUsersRepository {
 
     // MARK: - Public methods and properties
 
@@ -8,7 +8,44 @@ class SQLiteUsersRepository : UsersRepository {
         self.connection = connection
     }
 
-    // MARK: - Overridden methods
+    // MARK: - Internal methods
+
+    private func setupTableIfNeeded() -> Table {
+        if table == nil {
+            table = Table(Constants.tableName)
+
+            do {
+                try connection.run(table!.create(
+                    ifNotExists: true,
+                    withoutRowid: true) { builder in
+                        builder.column(idColumn, primaryKey: true)
+                        builder.column(registeredAtColumn)
+                    }
+                )
+            }
+            catch { }
+        }
+
+        return table!
+    }
+
+    // MARK: - Internal fields
+
+    private let connection: Connection
+
+    private var table: Table?
+    private let idColumn = Expression<String>(Constants.idColumnName)
+    private let registeredAtColumn = Expression<Int>(Constants.registeredAtColumnName)
+
+    private enum Constants {
+        static let tableName = "users"
+
+        static let idColumnName = "id"
+        static let registeredAtColumnName = "registeredAt"
+    }
+}
+
+extension SQLiteUsersRepository : UsersRepository {
 
     func registerUser(_ user: User) async -> Bool {
         let table = setupTableIfNeeded()
@@ -47,39 +84,4 @@ class SQLiteUsersRepository : UsersRepository {
         return result
     }
 
-    // MARK: - Internal methods
-
-    private func setupTableIfNeeded() -> Table {
-        if table == nil {
-            table = Table(Constants.tableName)
-
-            do {
-                try connection.run(table!.create(
-                    ifNotExists: true,
-                    withoutRowid: true) { builder in
-                        builder.column(idColumn, primaryKey: true)
-                        builder.column(registeredAtColumn)
-                    }
-                )
-            }
-            catch { }
-        }
-
-        return table!
-    }
-
-    // MARK: - Internal fields
-
-    private let connection: Connection
-
-    private var table: Table?
-    private let idColumn = Expression<String>(Constants.idColumnName)
-    private let registeredAtColumn = Expression<Int>(Constants.registeredAtColumnName)
-
-    private enum Constants {
-        static let tableName = "users"
-
-        static let idColumnName = "id"
-        static let registeredAtColumnName = "registeredAt"
-    }
 }

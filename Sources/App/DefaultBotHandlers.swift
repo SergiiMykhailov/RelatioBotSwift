@@ -1,6 +1,7 @@
 import Vapor
 import telegram_vapor_bot
 import Schedule
+import SQLite
 
 final class DefaultBotHandlers {
 
@@ -9,31 +10,21 @@ final class DefaultBotHandlers {
     public static func addHandlers(
         app: Vapor.Application,
         bot: TGBotPrtcl,
-        usersRepository: UsersRepository
+        usersRepository: UsersRepository,
+        activitiesRepository: ActivitiesRepository
     ) {
         self.usersRepository = usersRepository
+        self.activitiesRepository = activitiesRepository
         self.bot = bot
 
-        setupDefaultHandler(app: app, bot: bot)
         setupStartHandler(app: app, bot: bot)
 
-        commandShowButtonsHandler(app: app, bot: bot)
-        buttonsActionHandler(app: app, bot: bot)
+        setupButtonsActionHandler(app: app, bot: bot)
 
         setupActivities()
     }
 
     // MARK: - Internal methods
-
-    /// add handler for all messages unless command "/start"
-    private static func setupDefaultHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGMessageHandler(filters: (.all && !.command.names([Commands.start]))) { update, bot in
-            let params: TGSendMessageParams = .init(chatId: .chat(update.message!.chat.id), text: "Success")
-            try bot.sendMessage(params: params)
-        }
-
-        bot.connection.dispatcher.add(handler)
-    }
 
     /// add handler for command "/start"
     private static func setupStartHandler(app: Vapor.Application, bot: TGBotPrtcl) {
@@ -44,52 +35,139 @@ final class DefaultBotHandlers {
             let userToRegister = User(withId: userId, registeredAtTimestamp: registeredAtTimestamp)
 
             _Concurrency.Task {
-                await usersRepository?.registerUser(userToRegister)
+                _ = await usersRepository?.registerUser(userToRegister)
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: "Приветствую, я буду помогать тебе следить за качеством отношений с твоей женщиной.\n - Я буду напоминать о ежедневных, еженедельных и ежемесячных вещах, которые ты должен делать, чтобы проявлять о ней заботу и чтобы она чувствовала себя защищенной\n- Я буду проводить опрос о том, что ты сделал за день, неделю, месяц\n - На основании этих опросов мы будем следить насколько ты был плох или хорош, прогессируют ли ваши отношения или ухудшаются\n - Также я буду периодически присылать обучающий конент, чтобы ты понимал почему делать те или иные вещи важно, что чувствуют мужчины и женщины при тех или иных событиях и как себя более правильно вести\n - Все будет хорошо, но нужно немного поработать, результат зависит от тебя"
+                )
             }
         }
 
         bot.connection.dispatcher.add(handler)
     }
 
-    /// add handler for command "/show_buttons" - show message with buttons
-    private static func commandShowButtonsHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: ["/show_buttons"]) { update, bot in
-            guard let userId = update.message?.from?.id else { fatalError("user id not found") }
-            let buttons: [[TGInlineKeyboardButton]] = [
-                [.init(text: "Button 1", callbackData: "press 1"), .init(text: "Button 2", callbackData: "press 2")]
-            ]
-            let keyboard: TGInlineKeyboardMarkup = .init(inlineKeyboard: buttons)
-            let params: TGSendMessageParams = .init(chatId: .chat(userId),
-                                                    text: "Keyboard activ",
-                                                    replyMarkup: .inlineKeyboardMarkup(keyboard))
-            try bot.sendMessage(params: params)
+    /// add callbacks for buttons
+    private static func setupButtonsActionHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        // Handle morning activities replies
+        let dailyMorningActivityYesButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportMorningActivityYes) { update, bot in
+                _Concurrency.Task {
+                    let userId = update.callbackQuery!.message!.chat.id
+
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyMorningActivity,
+                            data: "1",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+
+                    askAboutDailyLunchActivity(ofUserWithId: userId)
+                }
         }
 
-        bot.connection.dispatcher.add(handler)
-    }
+        let dailyMorningActivityNoButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportMorningActivityNo) { update, bot in
+                _Concurrency.Task {
+                    let userId = update.callbackQuery!.message!.chat.id
 
-    /// add two handlers for callbacks buttons
-    private static func buttonsActionHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCallbackQueryHandler(pattern: "press 1") { update, bot in
-            let params: TGAnswerCallbackQueryParams = .init(callbackQueryId: update.callbackQuery?.id ?? "0",
-                                                            text: update.callbackQuery?.data  ?? "data not exist",
-                                                            showAlert: nil,
-                                                            url: nil,
-                                                            cacheTime: nil)
-            try bot.answerCallbackQuery(params: params)
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyMorningActivity,
+                            data: "0",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+
+                    askAboutDailyLunchActivity(ofUserWithId: userId)
+                }
         }
 
-        let handler2 = TGCallbackQueryHandler(pattern: "press 2") { update, bot in
-            let params: TGAnswerCallbackQueryParams = .init(callbackQueryId: update.callbackQuery?.id ?? "0",
-                                                            text: update.callbackQuery?.data  ?? "data not exist",
-                                                            showAlert: nil,
-                                                            url: nil,
-                                                            cacheTime: nil)
-            try bot.answerCallbackQuery(params: params)
+        // Handle lunch activities reply
+
+        let dailyLunchActivityYesButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportLunchActivityYes) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+
+                _Concurrency.Task {
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyLunchActivity,
+                            data: "1",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+
+                    askAboutDailyEveningActivity(ofUserWithId: userId)
+                }
         }
 
-        bot.connection.dispatcher.add(handler)
-        bot.connection.dispatcher.add(handler2)
+        let dailyLunchActivityNoButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportLunchActivityNo) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+
+                _Concurrency.Task {
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyLunchActivity,
+                            data: "0",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+
+                    askAboutDailyEveningActivity(ofUserWithId: userId)
+                }
+        }
+
+        // Handle evening activities reply
+
+        let dailyEveningActivityYesButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportEveningActivityYes) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+
+                _Concurrency.Task {
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyLunchActivity,
+                            data: "1",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+                }
+
+                sendDailyReport(toUserWithId: userId)
+        }
+
+        let dailyEveningActivityNoButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.dailyReportEveningActivityNo) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+
+                _Concurrency.Task {
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .dailyEveningActivity,
+                            data: "0",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+                }
+
+                sendDailyReport(toUserWithId: userId)
+        }
+
+        bot.connection.dispatcher.add(dailyMorningActivityYesButtonHandler)
+        bot.connection.dispatcher.add(dailyMorningActivityNoButtonHandler)
+        bot.connection.dispatcher.add(dailyLunchActivityYesButtonHandler)
+        bot.connection.dispatcher.add(dailyLunchActivityNoButtonHandler)
+        bot.connection.dispatcher.add(dailyEveningActivityYesButtonHandler)
+        bot.connection.dispatcher.add(dailyEveningActivityNoButtonHandler)
     }
 
     private static func setupActivities() {
@@ -127,37 +205,138 @@ final class DefaultBotHandlers {
     }
 
     private static func handleDailyMorningActivity() {
+        sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день")
+    }
+
+    private static func handleDailyLunchActivity() {
+        sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер")
+    }
+
+    private static func handleDailyEveningActivity() {
+        sendMessageToAllUsers("Добрый вечер, \n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин ...)")
+    }
+
+    private static func handleDailyReport() {
+        foreachUser { userId in
+            askAboutDailyMorningActivity(ofUserWithId: userId)
+        }
+    }
+
+    private static func askAboutDailyMorningActivity(ofUserWithId userId: Int64) {
+        askAboutDailyActivity(
+            ofUserWithId: userId,
+            withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?",
+            yesButtonId: Constants.dailyReportMorningActivityYes,
+            noButtonId: Constants.dailyReportMorningActivityNo
+        )
+    }
+
+    private static func askAboutDailyLunchActivity(ofUserWithId userId: Int64) {
+        askAboutDailyActivity(
+            ofUserWithId: userId,
+            withMessage: "Были ли выполнены дневные ритуалы?",
+            yesButtonId: Constants.dailyReportLunchActivityYes,
+            noButtonId: Constants.dailyReportLunchActivityNo
+        )
+    }
+
+    private static func askAboutDailyEveningActivity(ofUserWithId userId: Int64) {
+        askAboutDailyActivity(
+            ofUserWithId: userId,
+            withMessage: "Были ли выполнены вечерние ритуалы?",
+            yesButtonId: Constants.dailyReportEveningActivityYes,
+            noButtonId: Constants.dailyReportEveningActivityNo
+        )
+    }
+
+    private static func askAboutDailyActivity(
+        ofUserWithId userId: Int64,
+        withMessage message: String,
+        yesButtonId: String,
+        noButtonId: String
+    ) {
+        let buttons: [[TGInlineKeyboardButton]] = [[
+            .init(
+                text: "Нет",
+                callbackData: noButtonId
+            ),
+            .init(
+                text: "Да",
+                callbackData: yesButtonId
+            )
+        ]]
+
+        let keyboard: TGInlineKeyboardMarkup = .init(inlineKeyboard: buttons)
+        let params: TGSendMessageParams = .init(
+            chatId: .chat(userId),
+            text: message,
+            replyMarkup: .inlineKeyboardMarkup(keyboard)
+        )
+
+        _ = try? bot?.sendMessage(params: params)
+    }
+
+    private static func sendMessageToAllUsers(_ message: String) {
+        foreachUser { userId in
+            sendMessage(toUserWithId: userId, message: message)
+        }
+    }
+
+    private static func sendMessage(toUserWithId userId: Int64, message: String) {
+        let message = TGSendMessageParams(
+            chatId: .chat(userId),
+            text: message
+        )
+
+        _ = try? bot?.sendMessage(params: message)
+    }
+
+    private static func sendDailyReport(toUserWithId userId: Int64) {
+        _Concurrency.Task {
+            let startOfDayTimestamp = Date().startOfDay.timeIntervalSince1970
+            let endOfDayTimestamp = Date().endOfDay.timeIntervalSince1970
+
+            let userDailyActivities = await activitiesRepository!.loadActivities(
+                ofUserWithId: "\(userId)",
+                fromTimestamp: Int(startOfDayTimestamp),
+                toTimestamp: Int(endOfDayTimestamp)
+            )
+
+            var score = 0
+            for activity in userDailyActivities {
+                if [ActivityType.dailyMorningActivity,
+                    ActivityType.dailyLunchActivity,
+                    ActivityType.dailyEveningActivity
+                ].contains(activity.type),
+                   activity.data == "1" {
+                    score += Constants.dailyActivityScore
+                }
+            }
+
+            let message = "За сегодня было набрано \(score) балл(а)"
+
+            sendMessage(toUserWithId: userId, message: message)
+        }
+    }
+
+    typealias ForeachUserCallback = (Int64) -> Void
+
+    private static func foreachUser(do action: @escaping ForeachUserCallback) {
         _Concurrency.Task {
             let registeredUsers = await usersRepository!.loadUsers()
 
             for user in registeredUsers {
                 if let chatId = Int64(user.id) {
-                    let message = TGSendMessageParams(
-                        chatId: .chat(chatId),
-                        text: "Good morning"
-                    )
-
-                    _ = try? bot?.sendMessage(params: message)
+                    action(chatId)
                 }
             }
         }
     }
 
-    private static func handleDailyLunchActivity() {
-
-    }
-
-    private static func handleDailyEveningActivity() {
-
-    }
-
-    private static func handleDailyReport() {
-
-    }
-
     // MARK: - Internal fields
 
     private static var usersRepository: UsersRepository?
+    private static var activitiesRepository: ActivitiesRepository?
     private static var bot: TGBotPrtcl?
 
     private static var dailyMorningActivityTask: Schedule.Task!
@@ -167,5 +346,16 @@ final class DefaultBotHandlers {
 
     private enum Commands {
         static let start = "/start"
+    }
+
+    private enum Constants {
+        static let dailyReportMorningActivityYes = "dailyReportMorningActivityYes"
+        static let dailyReportMorningActivityNo = "dailyReportMorningActivityNo"
+        static let dailyReportLunchActivityYes = "dailyReportLunchActivityYes"
+        static let dailyReportLunchActivityNo = "dailyReportLunchActivityNo"
+        static let dailyReportEveningActivityYes = "dailyReportEveningActivityYes"
+        static let dailyReportEveningActivityNo = "dailyReportEveningActivityNo"
+
+        static let dailyActivityScore = 1
     }
 }
