@@ -1,4 +1,5 @@
 import Vapor
+import Logging
 import telegram_vapor_bot
 import Schedule
 import SQLite
@@ -13,7 +14,7 @@ final class DefaultBotHandlers {
         usersRepository: UsersRepository,
         activitiesRepository: ActivitiesRepository
     ) {
-        log("[INFO] Initializing bot...")
+        log("Initializing bot...")
 
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
@@ -173,17 +174,17 @@ final class DefaultBotHandlers {
     }
 
     private static func setupActivities() {
-        log("[INFO] Setting up activities...")
+        log("Setting up activities...")
 
         setupStatusLogging()
         setupDailyActivities()
 
-        log("[INFO] Activities setup complected")
+        log("Activities setup complected")
     }
 
     private static func setupStatusLogging() {
         statusLoggingTask = Plan.every(1.minute).do(queue: .global()) {
-            log(" [STATUS] - Alive")
+            log("[STATUS] - Alive")
         }
     }
 
@@ -361,11 +362,12 @@ final class DefaultBotHandlers {
     }
 
     private static func log(_ message: String) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        let dateString = formatter.string(from: Date())
+        let logger = Logger(label: "RelatioBotSwift")
 
-        print("\(dateString): \(message)")
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let dateString = formatter.string(from: Date())
+        logger.info("\(dateString): \(message)")
     }
 
     // MARK: - Internal fields
