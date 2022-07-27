@@ -171,7 +171,14 @@ final class DefaultBotHandlers {
     }
 
     private static func setupActivities() {
+        setupStatusLogging()
         setupDailyActivities()
+    }
+
+    private static func setupStatusLogging() {
+        statusLoggingTask = Plan.every(1.minute).do(queue: .global()) {
+            log(" [STATUS] - Alive")
+        }
     }
 
     private static func setupDailyActivities() {
@@ -205,24 +212,30 @@ final class DefaultBotHandlers {
     }
 
     private static func handleDailyMorningActivity() {
+        log(" [ACTIVITY] - Sending morning activities reminders")
         sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день")
     }
 
     private static func handleDailyLunchActivity() {
+        log(" [ACTIVITY] - Sending lunch activities reminders")
         sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер")
     }
 
     private static func handleDailyEveningActivity() {
+        log(" [ACTIVITY] - Sending evening activities reminders")
         sendMessageToAllUsers("Добрый вечер, \n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин ...)")
     }
 
     private static func handleDailyReport() {
+        log(" [ACTIVITY] - Handling daily reports")
         foreachUser { userId in
             askAboutDailyMorningActivity(ofUserWithId: userId)
         }
     }
 
     private static func askAboutDailyMorningActivity(ofUserWithId userId: Int64) {
+        log(" [ACTIVITY] - Asking about morning activity of user [\(userId)]")
+
         askAboutDailyActivity(
             ofUserWithId: userId,
             withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?",
@@ -232,6 +245,8 @@ final class DefaultBotHandlers {
     }
 
     private static func askAboutDailyLunchActivity(ofUserWithId userId: Int64) {
+        log(" [ACTIVITY] - Asking about daily activity of user [\(userId)]")
+
         askAboutDailyActivity(
             ofUserWithId: userId,
             withMessage: "Были ли выполнены дневные ритуалы?",
@@ -241,6 +256,8 @@ final class DefaultBotHandlers {
     }
 
     private static func askAboutDailyEveningActivity(ofUserWithId userId: Int64) {
+        log(" [ACTIVITY] - Asking about evening activity of user [\(userId)]")
+
         askAboutDailyActivity(
             ofUserWithId: userId,
             withMessage: "Были ли выполнены вечерние ритуалы?",
@@ -292,6 +309,8 @@ final class DefaultBotHandlers {
     }
 
     private static func sendDailyReport(toUserWithId userId: Int64) {
+        log(" [ACTIVITY] - Sending daily report to user [\(userId)]")
+
         _Concurrency.Task {
             let startOfDayTimestamp = Date().startOfDay.timeIntervalSince1970
             let endOfDayTimestamp = Date().endOfDay.timeIntervalSince1970
@@ -316,6 +335,8 @@ final class DefaultBotHandlers {
             let message = "За сегодня было набрано \(score) балл(а)"
 
             sendMessage(toUserWithId: userId, message: message)
+
+            log(" [ACTIVITY] - Sent daily report to user [\(userId)]")
         }
     }
 
@@ -333,11 +354,21 @@ final class DefaultBotHandlers {
         }
     }
 
+    private static func log(_ message: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        let dateString = formatter.string(from: Date())
+
+        print("\(dateString): \(message)")
+    }
+
     // MARK: - Internal fields
 
     private static var usersRepository: UsersRepository?
     private static var activitiesRepository: ActivitiesRepository?
     private static var bot: TGBotPrtcl?
+
+    private static var statusLoggingTask: Schedule.Task!
 
     private static var dailyMorningActivityTask: Schedule.Task!
     private static var dailyLunchActivityTask: Schedule.Task!
