@@ -13,6 +13,8 @@ final class DefaultBotHandlers {
         usersRepository: UsersRepository,
         activitiesRepository: ActivitiesRepository
     ) {
+        log("[INFO] Initializing bot...")
+
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
         self.bot = bot
@@ -171,8 +173,12 @@ final class DefaultBotHandlers {
     }
 
     private static func setupActivities() {
+        log("[INFO] Setting up activities...")
+
         setupStatusLogging()
         setupDailyActivities()
+
+        log("[INFO] Activities setup complected")
     }
 
     private static func setupStatusLogging() {
