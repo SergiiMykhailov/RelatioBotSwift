@@ -174,11 +174,7 @@ final class DefaultBotHandlers {
     }
 
     private static func setupActivities() {
-        log("Setting up activities...")
-
         setupDailyActivities()
-
-        log("Activities setup complected")
     }
 
     private static func setupDailyActivities() {
