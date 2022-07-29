@@ -176,16 +176,9 @@ final class DefaultBotHandlers {
     private static func setupActivities() {
         log("Setting up activities...")
 
-        setupStatusLogging()
         setupDailyActivities()
 
         log("Activities setup complected")
-    }
-
-    private static func setupStatusLogging() {
-        statusLoggingTask = Plan.every(1.minute).do(queue: .global()) {
-            log("[STATUS] - Alive")
-        }
     }
 
     private static func setupDailyActivities() {
@@ -375,8 +368,6 @@ final class DefaultBotHandlers {
     private static var usersRepository: UsersRepository?
     private static var activitiesRepository: ActivitiesRepository?
     private static var bot: TGBotPrtcl?
-
-    private static var statusLoggingTask: Schedule.Task!
 
     private static var dailyMorningActivityTask: Schedule.Task!
     private static var dailyLunchActivityTask: Schedule.Task!
