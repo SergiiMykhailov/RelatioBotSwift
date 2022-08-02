@@ -14,7 +14,7 @@ final class DefaultBotHandlers {
         usersRepository: UsersRepository,
         activitiesRepository: ActivitiesRepository
     ) {
-        log("Initializing bot...")
+        log("Initializing bot (build: 1)...")
 
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
