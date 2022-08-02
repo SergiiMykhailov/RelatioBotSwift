@@ -208,29 +208,29 @@ final class DefaultBotHandlers {
     }
 
     private static func handleDailyMorningActivity() {
-        log(" [ACTIVITY] - Sending morning activities reminders")
+        log("[ACTIVITY] - Sending morning activities reminders")
         sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день")
     }
 
     private static func handleDailyLunchActivity() {
-        log(" [ACTIVITY] - Sending lunch activities reminders")
+        log("[ACTIVITY] - Sending lunch activities reminders")
         sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер")
     }
 
     private static func handleDailyEveningActivity() {
-        log(" [ACTIVITY] - Sending evening activities reminders")
-        sendMessageToAllUsers("Добрый вечер, \n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин ...)")
+        log("[ACTIVITY] - Sending evening activities reminders")
+        sendMessageToAllUsers("Добрый вечер,\n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин ...)")
     }
 
     private static func handleDailyReport() {
-        log(" [ACTIVITY] - Handling daily reports")
+        log("[ACTIVITY] - Handling daily reports")
         foreachUser { userId in
             askAboutDailyMorningActivity(ofUserWithId: userId)
         }
     }
 
     private static func askAboutDailyMorningActivity(ofUserWithId userId: Int64) {
-        log(" [ACTIVITY] - Asking about morning activity of user [\(userId)]")
+        log("[ACTIVITY] - Asking about morning activity of user [\(userId)]")
 
         askAboutDailyActivity(
             ofUserWithId: userId,
@@ -241,7 +241,7 @@ final class DefaultBotHandlers {
     }
 
     private static func askAboutDailyLunchActivity(ofUserWithId userId: Int64) {
-        log(" [ACTIVITY] - Asking about daily activity of user [\(userId)]")
+        log("[ACTIVITY] - Asking about daily activity of user [\(userId)]")
 
         askAboutDailyActivity(
             ofUserWithId: userId,
@@ -252,7 +252,7 @@ final class DefaultBotHandlers {
     }
 
     private static func askAboutDailyEveningActivity(ofUserWithId userId: Int64) {
-        log(" [ACTIVITY] - Asking about evening activity of user [\(userId)]")
+        log("[ACTIVITY] - Asking about evening activity of user [\(userId)]")
 
         askAboutDailyActivity(
             ofUserWithId: userId,
@@ -305,7 +305,7 @@ final class DefaultBotHandlers {
     }
 
     private static func sendDailyReport(toUserWithId userId: Int64) {
-        log(" [ACTIVITY] - Sending daily report to user [\(userId)]")
+        log("[ACTIVITY] - Sending daily report to user [\(userId)]")
 
         _Concurrency.Task {
             let startOfDayTimestamp = Date().startOfDay.timeIntervalSince1970
