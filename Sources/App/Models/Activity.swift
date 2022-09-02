@@ -3,6 +3,16 @@ enum ActivityType : Int {
     case dailyMorningActivity = 1
     case dailyLunchActivity = 2
     case dailyEveningActivity = 3
+    case weeklyActivity = 4
+    case monthlyActivity = 5
+
+    static var allActivities: [ActivityType] = [
+        .dailyMorningActivity,
+        .dailyLunchActivity,
+        .dailyEveningActivity,
+        .weeklyActivity,
+        .monthlyActivity
+    ]
 }
 
 final class Activity {

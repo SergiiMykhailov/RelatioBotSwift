@@ -16,6 +16,16 @@ extension Date {
         return Calendar.current.date(byAdding: components, to: startOfDay)!
     }
 
+    var startOfWeek: Date {
+        let result = previous(.monday, considerToday: true)
+        return result
+    }
+
+    var endOfWeek: Date {
+        let result = next(.sunday, considerToday: true)
+        return result
+    }
+
     var startOfMonth: Date {
         let components = Calendar.current.dateComponents([.year, .month], from: startOfDay)
         return Calendar.current.date(from: components)!
@@ -26,6 +36,14 @@ extension Date {
         components.month = 1
         components.second = -1
         return Calendar.current.date(byAdding: components, to: startOfMonth)!
+    }
+
+    var isLastDayOfMonth: Bool {
+        let endOfMonthDayComponents = Calendar.current.dateComponents([.day], from: endOfMonth)
+        let currentDayComponents = Calendar.current.dateComponents([.day], from: self)
+
+        let result = endOfMonthDayComponents.day == currentDayComponents.day
+        return result
     }
 
     func next(_ weekday: Weekday, considerToday: Bool = false) -> Date {
@@ -40,9 +58,11 @@ extension Date {
                    considerToday: considerToday)
     }
 
-    func get(_ direction: SearchDirection,
-             _ weekDay: Weekday,
-             considerToday consider: Bool = false) -> Date {
+    func get(
+        _ direction: SearchDirection,
+        _ weekDay: Weekday,
+        considerToday consider: Bool = false
+    ) -> Date {
         let dayName = weekDay.rawValue
         let weekdaysName = getWeekDaysInEnglish().map { $0.lowercased() }
         assert(weekdaysName.contains(dayName), "weekday symbol should be in form \(weekdaysName)")
@@ -67,6 +87,27 @@ extension Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "en_US_POSIX")
         return calendar.weekdaySymbols
+    }
+
+    var dayOfWeek: Weekday? {
+        let calendar = Calendar.current
+        let weekDay = calendar.component(Calendar.Component.weekday, from: self)
+        let result = Date.dayOfWeek(fromDayIndex: weekDay)
+
+        return result
+    }
+
+    static func dayOfWeek(fromDayIndex dayIndex: Int) -> Weekday? {
+        switch (dayIndex) {
+            case 1: return .sunday
+            case 2: return .monday
+            case 3: return .tuesday
+            case 4: return .wednesday
+            case 5: return .thursday
+            case 6: return .friday
+            case 7: return .saturday
+            default: return nil
+        }
     }
 
     enum Weekday: String {
