@@ -261,17 +261,17 @@ final class DefaultBotHandlers {
 
     private static func handleDailyMorningActivity() {
         log("[ACTIVITY] - Sending morning activities reminders")
-        sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день (+\(Constants.dailyActivityScore) ТТД)")
+        sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день **(+\(Constants.dailyActivityScore) ТТД)**")
     }
 
     private static func handleDailyLunchActivity() {
         log("[ACTIVITY] - Sending lunch activities reminders")
-        sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер (+\(Constants.dailyActivityScore) ТТД)")
+        sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер **(+\(Constants.dailyActivityScore) ТТД)**")
     }
 
     private static func handleDailyEveningActivity() {
         log("[ACTIVITY] - Sending evening activities reminders")
-        sendMessageToAllUsers("Добрый вечер,\n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь (+\(Constants.dailyActivityScore) ТТД) \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин, пригласить на ужин в ресторан ...) (+\(Constants.weeklyActivityScore) ТТД) \n - подумай над месячным ритуалом, возможно сегодня тоже можно его выполнить (выделить \"карманные\", купить подарок (драгоценность, сертификат в СПА, билет на концерт)) (+\(Constants.monthlyActivityScore) ТТД)")
+        sendMessageToAllUsers("Добрый вечер,\n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь **(+\(Constants.dailyActivityScore) ТТД)** \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин, пригласить на ужин в ресторан ...) **(+\(Constants.weeklyActivityScore) ТТД)** \n - подумай над месячным ритуалом, возможно сегодня тоже можно его выполнить (выделить \"карманные\", купить подарок (драгоценность, сертификат в СПА, билет на концерт)) **(+\(Constants.monthlyActivityScore) ТТД)**")
     }
 
     private static func handleReport() {
@@ -286,7 +286,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?\n(узнал как самочувствие и планах?) (+\(Constants.dailyActivityScore) ТТД)",
+            withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?\n(узнал как самочувствие и планах?) **(+\(Constants.dailyActivityScore) ТТД)**",
             yesButtonId: Constants.dailyReportMorningActivityYes,
             noButtonId: Constants.dailyReportMorningActivityNo
         )
@@ -297,7 +297,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены дневные ритуалы?\n(Узнал про планы на вечер, как проходит день?) (+\(Constants.dailyActivityScore) ТТД)",
+            withMessage: "Были ли выполнены дневные ритуалы?\n(Узнал про планы на вечер, как проходит день?) **(+\(Constants.dailyActivityScore) ТТД)**",
             yesButtonId: Constants.dailyReportLunchActivityYes,
             noButtonId: Constants.dailyReportLunchActivityNo
         )
@@ -308,18 +308,18 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены вечерние ритуалы?\n(Узнал нет ли проблем на работе, все ли в порядке с родственниками, нужна ли твоя помощь в каком-то вопросе?) (+\(Constants.dailyActivityScore) ТТД)",
+            withMessage: "Были ли выполнены вечерние ритуалы?\n(Узнал нет ли проблем на работе, все ли в порядке с родственниками, нужна ли твоя помощь в каком-то вопросе?) **(+\(Constants.dailyActivityScore) ТТД)**",
             yesButtonId: Constants.dailyReportEveningActivityYes,
             noButtonId: Constants.dailyReportEveningActivityNo
         )
     }
 
     private static func askAboutWeeklyActivity(ofUserWithId userId: Int64) {
-        log("[ACTIVITY] - Asking about weekly activity of user [\(userId)] (+\(Constants.weeklyActivityScore) ТТД)")
+        log("[ACTIVITY] - Asking about weekly activity of user [\(userId)]")
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены недельные ритуалы?\n(Подарил цветы? Любимое блюдо принес? В ресторан пригласил?)",
+            withMessage: "Были ли выполнены недельные ритуалы?\n(Подарил цветы? Любимое блюдо принес? В ресторан пригласил?) **(+\(Constants.weeklyActivityScore) ТТД)**",
             yesButtonId: Constants.weeklyActivityYes,
             noButtonId: Constants.weeklyActivityNo
         )
@@ -330,7 +330,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены месячные ритуалы?\n(Выделил \"карманные\"? Купил подарок (драгоценность, сертификат в СПА, билет на концерт)?) (+\(Constants.monthlyActivityScore) ТТД)",
+            withMessage: "Были ли выполнены месячные ритуалы?\n(Выделил \"карманные\"? Купил подарок (драгоценность, сертификат в СПА, билет на концерт)?) **(+\(Constants.monthlyActivityScore) ТТД)**",
             yesButtonId: Constants.monthlyActivityYes,
             noButtonId: Constants.monthlyActivityNo
         )
@@ -341,7 +341,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Возможно сегодня ты сделал что-то очень выдающееся?\n(Она попала в ДТП, разбила машину, а ты успокоил, уладил и починил машину или у нее украли телефон, а ты купил новый...) (+\(Constants.heroActivityScore) ТТД)",
+            withMessage: "Возможно сегодня ты сделал что-то очень выдающееся?\n(Она попала в ДТП, разбила машину, а ты успокоил, уладил и починил машину или у нее украли телефон, а ты купил новый...) **(+\(Constants.heroActivityScore) ТТД)**",
             yesButtonId: Constants.heroActivityYes,
             noButtonId: Constants.heroActivityNo
         )
@@ -480,7 +480,7 @@ final class DefaultBotHandlers {
             + weeklyActivitiesScore
             + monthlyActivitiesScore
             + heroActivitiesScore
-        
+
         return result
     }
 
