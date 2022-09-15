@@ -75,16 +75,6 @@ final class DefaultBotHandlers {
             pattern: Constants.dailyReportMorningActivityNo) { update, bot in
                 _Concurrency.Task {
                     let userId = update.callbackQuery!.message!.chat.id
-
-                    _ = await activitiesRepository?.registerActivity(
-                        Activity(
-                            withUserId: "\(userId)",
-                            type: .dailyMorningActivity,
-                            data: "0",
-                            timestamp: Int(Date().timeIntervalSince1970)
-                        )
-                    )
-
                     askAboutDailyLunchActivity(ofUserWithId: userId)
                 }
         }
@@ -112,19 +102,7 @@ final class DefaultBotHandlers {
         let dailyLunchActivityNoButtonHandler = TGCallbackQueryHandler(
             pattern: Constants.dailyReportLunchActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
-
-                _Concurrency.Task {
-                    _ = await activitiesRepository?.registerActivity(
-                        Activity(
-                            withUserId: "\(userId)",
-                            type: .dailyLunchActivity,
-                            data: "0",
-                            timestamp: Int(Date().timeIntervalSince1970)
-                        )
-                    )
-
-                    askAboutDailyEveningActivity(ofUserWithId: userId)
-                }
+                askAboutDailyEveningActivity(ofUserWithId: userId)
         }
 
         // Handle evening activities reply
@@ -150,18 +128,6 @@ final class DefaultBotHandlers {
         let dailyEveningActivityNoButtonHandler = TGCallbackQueryHandler(
             pattern: Constants.dailyReportEveningActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
-
-                _Concurrency.Task {
-                    _ = await activitiesRepository?.registerActivity(
-                        Activity(
-                            withUserId: "\(userId)",
-                            type: .dailyEveningActivity,
-                            data: "0",
-                            timestamp: Int(Date().timeIntervalSince1970)
-                        )
-                    )
-                }
-
                 askAboutWeeklyActivity(ofUserWithId: userId)
         }
 
@@ -188,18 +154,6 @@ final class DefaultBotHandlers {
         let weeklyActivityNoButtonHandler = TGCallbackQueryHandler(
             pattern: Constants.weeklyActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
-
-                _Concurrency.Task {
-                    _ = await activitiesRepository?.registerActivity(
-                        Activity(
-                            withUserId: "\(userId)",
-                            type: .weeklyActivity,
-                            data: "0",
-                            timestamp: Int(Date().timeIntervalSince1970)
-                        )
-                    )
-                }
-
                 askAboutMonthlyActivity(ofUserWithId: userId)
         }
 
@@ -213,7 +167,33 @@ final class DefaultBotHandlers {
                     _ = await activitiesRepository?.registerActivity(
                         Activity(
                             withUserId: "\(userId)",
-                            type: .weeklyActivity,
+                            type: .monthlyActivity,
+                            data: "1",
+                            timestamp: Int(Date().timeIntervalSince1970)
+                        )
+                    )
+                }
+
+                askAboutHeroActivity(ofUserWithId: userId)
+        }
+
+        let monthlyActivityNoButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.monthlyActivityNo) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+                askAboutHeroActivity(ofUserWithId: userId)
+        }
+
+        // Handle hero activities replies
+
+        let heroActivityYesButtonHandler = TGCallbackQueryHandler(
+            pattern: Constants.monthlyActivityYes) { update, bot in
+                let userId = update.callbackQuery!.message!.chat.id
+
+                _Concurrency.Task {
+                    _ = await activitiesRepository?.registerActivity(
+                        Activity(
+                            withUserId: "\(userId)",
+                            type: .heroActivity,
                             data: "1",
                             timestamp: Int(Date().timeIntervalSince1970)
                         )
@@ -223,23 +203,13 @@ final class DefaultBotHandlers {
                 sendReport(toUserWithId: userId)
         }
 
-        let monthlyActivityNoButtonHandler = TGCallbackQueryHandler(
+        let heroActivityNoButtonHandler = TGCallbackQueryHandler(
             pattern: Constants.monthlyActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
-
-                _Concurrency.Task {
-                    _ = await activitiesRepository?.registerActivity(
-                        Activity(
-                            withUserId: "\(userId)",
-                            type: .weeklyActivity,
-                            data: "0",
-                            timestamp: Int(Date().timeIntervalSince1970)
-                        )
-                    )
-                }
-
                 sendReport(toUserWithId: userId)
         }
+
+        // Registering handlers
 
         bot.connection.dispatcher.add(dailyMorningActivityYesButtonHandler)
         bot.connection.dispatcher.add(dailyMorningActivityNoButtonHandler)
@@ -251,6 +221,8 @@ final class DefaultBotHandlers {
         bot.connection.dispatcher.add(weeklyActivityNoButtonHandler)
         bot.connection.dispatcher.add(monthlyActivityYesButtonHandler)
         bot.connection.dispatcher.add(monthlyActivityNoButtonHandler)
+        bot.connection.dispatcher.add(heroActivityYesButtonHandler)
+        bot.connection.dispatcher.add(heroActivityNoButtonHandler)
     }
 
     private static func setupActivities() {
@@ -289,17 +261,17 @@ final class DefaultBotHandlers {
 
     private static func handleDailyMorningActivity() {
         log("[ACTIVITY] - Sending morning activities reminders")
-        sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день")
+        sendMessageToAllUsers("Доброе утро, \n - не забудь спросить о самочувствии и планах день (+\(Constants.dailyActivityScore) ТТД)")
     }
 
     private static func handleDailyLunchActivity() {
         log("[ACTIVITY] - Sending lunch activities reminders")
-        sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер")
+        sendMessageToAllUsers("Добрый день, \n - не забудь позвонить или отправить сообщение \n - узнать как дела \n какие планы на вечер (+\(Constants.dailyActivityScore) ТТД)")
     }
 
     private static func handleDailyEveningActivity() {
         log("[ACTIVITY] - Sending evening activities reminders")
-        sendMessageToAllUsers("Добрый вечер,\n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин, пригласить на ужин в ресторан ...) \n - подумай над месячным ритуалом, возможно сегодня тоже можно его выполнить (выделить \"карманные\", купить подарок (драгоценность, сертификат в СПА, билет на концерт))")
+        sendMessageToAllUsers("Добрый вечер,\n - не забудь забудь узнать как прошел день \n - как настроение, не устала ли \n - возможно были какие-то беспокойства (родственник заболел, конфликт на работе), уточни все ли в порядке, уладилось ли, возможно нужна помощь (+\(Constants.dailyActivityScore) ТТД) \n - возможно сегодня неплохой момент, чтобы выполнить недельный ритуал (подарить цветы, принести любимое блюдо на ужин, пригласить на ужин в ресторан ...) (+\(Constants.weeklyActivityScore) ТТД) \n - подумай над месячным ритуалом, возможно сегодня тоже можно его выполнить (выделить \"карманные\", купить подарок (драгоценность, сертификат в СПА, билет на концерт)) (+\(Constants.monthlyActivityScore) ТТД)")
     }
 
     private static func handleReport() {
@@ -314,7 +286,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?\n(узнал как самочувствие и планах?)",
+            withMessage: "Добрый вечер, время проверить сколько было уделено внимания\nБыли ли выполнены утренние ритуалы?\n(узнал как самочувствие и планах?) (+\(Constants.dailyActivityScore) ТТД)",
             yesButtonId: Constants.dailyReportMorningActivityYes,
             noButtonId: Constants.dailyReportMorningActivityNo
         )
@@ -325,7 +297,7 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены дневные ритуалы?\n(Узнал про планы на вечер, как проходит день?)",
+            withMessage: "Были ли выполнены дневные ритуалы?\n(Узнал про планы на вечер, как проходит день?) (+\(Constants.dailyActivityScore) ТТД)",
             yesButtonId: Constants.dailyReportLunchActivityYes,
             noButtonId: Constants.dailyReportLunchActivityNo
         )
@@ -336,14 +308,14 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены вечерние ритуалы?\n(Узнал нет ли проблем на работе, все ли в порядке с родственниками, нужна ли твоя помощь в каком-то вопросе?)",
+            withMessage: "Были ли выполнены вечерние ритуалы?\n(Узнал нет ли проблем на работе, все ли в порядке с родственниками, нужна ли твоя помощь в каком-то вопросе?) (+\(Constants.dailyActivityScore) ТТД)",
             yesButtonId: Constants.dailyReportEveningActivityYes,
             noButtonId: Constants.dailyReportEveningActivityNo
         )
     }
 
     private static func askAboutWeeklyActivity(ofUserWithId userId: Int64) {
-        log("[ACTIVITY] - Asking about weekly activity of user [\(userId)]")
+        log("[ACTIVITY] - Asking about weekly activity of user [\(userId)] (+\(Constants.weeklyActivityScore) ТТД)")
 
         askAboutActivity(
             ofUserWithId: userId,
@@ -358,9 +330,20 @@ final class DefaultBotHandlers {
 
         askAboutActivity(
             ofUserWithId: userId,
-            withMessage: "Были ли выполнены месячные ритуалы?\n(Выделил \"карманные\"? Купил подарок (драгоценность, сертификат в СПА, билет на концерт)?)",
+            withMessage: "Были ли выполнены месячные ритуалы?\n(Выделил \"карманные\"? Купил подарок (драгоценность, сертификат в СПА, билет на концерт)?) (+\(Constants.monthlyActivityScore) ТТД)",
             yesButtonId: Constants.monthlyActivityYes,
             noButtonId: Constants.monthlyActivityNo
+        )
+    }
+
+    private static func askAboutHeroActivity(ofUserWithId userId: Int64) {
+        log("[ACTIVITY] - Asking about monthly activity of user [\(userId)]")
+
+        askAboutActivity(
+            ofUserWithId: userId,
+            withMessage: "Возможно сегодня ты сделал что-то очень выдающееся?\n(Она попала в ДТП, разбила машину, а ты успокоил, уладил и починил машину или у нее украли телефон, а ты купил новый...) (+\(Constants.heroActivityScore) ТТД)",
+            yesButtonId: Constants.heroActivityYes,
+            noButtonId: Constants.heroActivityNo
         )
     }
 
@@ -485,7 +468,19 @@ final class DefaultBotHandlers {
             withActivityScore: Constants.monthlyActivityScore
         )
 
-        let result = dailyActivitiesScore + weeklyActivitiesScore + monthlyActivitiesScore
+        let heroActivitiesScore = await calculateScore(
+            ofUserWithId: userId,
+            fromStartTimestamp: startTimestamp,
+            toTimestamp: endTimestamp,
+            ofActivities: [.heroActivity],
+            withActivityScore: Constants.heroActivityScore
+        )
+
+        let result = dailyActivitiesScore
+            + weeklyActivitiesScore
+            + monthlyActivitiesScore
+            + heroActivitiesScore
+        
         return result
     }
 
@@ -582,9 +577,12 @@ final class DefaultBotHandlers {
         static let weeklyActivityNo = "weeklyActivityNo"
         static let monthlyActivityYes = "monthlyActivityYes"
         static let monthlyActivityNo = "monthlyActivityNo"
+        static let heroActivityYes = "heroActivityYes"
+        static let heroActivityNo = "heroActivityNo"
 
         static let dailyActivityScore = 1
         static let weeklyActivityScore = 5
         static let monthlyActivityScore = 15
+        static let heroActivityScore = 50
     }
 }

@@ -5,6 +5,7 @@ enum ActivityType : Int {
     case dailyEveningActivity = 3
     case weeklyActivity = 4
     case monthlyActivity = 5
+    case heroActivity = 6
 
     static var allActivities: [ActivityType] = [
         .dailyMorningActivity,
