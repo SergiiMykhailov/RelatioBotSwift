@@ -186,7 +186,7 @@ final class DefaultBotHandlers {
         // Handle hero activities replies
 
         let heroActivityYesButtonHandler = TGCallbackQueryHandler(
-            pattern: Constants.monthlyActivityYes) { update, bot in
+            pattern: Constants.heroActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
                 _Concurrency.Task {
@@ -204,7 +204,7 @@ final class DefaultBotHandlers {
         }
 
         let heroActivityNoButtonHandler = TGCallbackQueryHandler(
-            pattern: Constants.monthlyActivityNo) { update, bot in
+            pattern: Constants.heroActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 sendReport(toUserWithId: userId)
         }
