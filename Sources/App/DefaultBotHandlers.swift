@@ -383,7 +383,8 @@ final class DefaultBotHandlers {
     private static func sendMessage(toUserWithId userId: Int64, message: String) {
         let message = TGSendMessageParams(
             chatId: .chat(userId),
-            text: message
+            text: message,
+            parseMode: .markdownV2
         )
 
         _ = try? bot?.sendMessage(params: message)
