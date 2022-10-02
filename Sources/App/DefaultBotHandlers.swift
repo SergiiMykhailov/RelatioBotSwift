@@ -14,16 +14,12 @@ final class DefaultBotHandlers {
         usersRepository: UsersRepository,
         activitiesRepository: ActivitiesRepository
     ) {
-        log("Initializing bot (build: 1)...")
-
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
         self.bot = bot
 
         setupStartHandler(app: app, bot: bot)
-
         setupButtonsActionHandler(app: app, bot: bot)
-
         setupActivities()
     }
 
@@ -52,8 +48,22 @@ final class DefaultBotHandlers {
 
     /// add callbacks for buttons
     private static func setupButtonsActionHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        // Handle morning activities replies
-        let dailyMorningActivityYesButtonHandler = TGCallbackQueryHandler(
+        bot.connection.dispatcher.add(makeDailyMorningActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeDailyMorningActivityNoButtonHandler())
+        bot.connection.dispatcher.add(makeDailyLunchActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeDailyLunchActivityNoButtonHandler())
+        bot.connection.dispatcher.add(makeDailyEveningActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeDailyEveningActivityNoButtonHandler())
+        bot.connection.dispatcher.add(makeWeeklyActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeWeeklyActivityNoButtonHandler())
+        bot.connection.dispatcher.add(makeMonthlyActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeMonthlyActivityNoButtonHandler())
+        bot.connection.dispatcher.add(makeHeroActivityYesButtonHandler())
+        bot.connection.dispatcher.add(makeHeroActivityNoButtonHandler())
+    }
+
+    private static func makeDailyMorningActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.dailyReportMorningActivityYes) { update, bot in
                 _Concurrency.Task {
                     let userId = update.callbackQuery!.message!.chat.id
@@ -70,18 +80,20 @@ final class DefaultBotHandlers {
                     askAboutDailyLunchActivity(ofUserWithId: userId)
                 }
         }
+    }
 
-        let dailyMorningActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeDailyMorningActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.dailyReportMorningActivityNo) { update, bot in
                 _Concurrency.Task {
                     let userId = update.callbackQuery!.message!.chat.id
                     askAboutDailyLunchActivity(ofUserWithId: userId)
                 }
         }
+    }
 
-        // Handle lunch activities reply
-
-        let dailyLunchActivityYesButtonHandler = TGCallbackQueryHandler(
+    private static func makeDailyLunchActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.dailyReportLunchActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
@@ -98,16 +110,18 @@ final class DefaultBotHandlers {
                     askAboutDailyEveningActivity(ofUserWithId: userId)
                 }
         }
+    }
 
-        let dailyLunchActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeDailyLunchActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.dailyReportLunchActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 askAboutDailyEveningActivity(ofUserWithId: userId)
         }
+    }
 
-        // Handle evening activities reply
-
-        let dailyEveningActivityYesButtonHandler = TGCallbackQueryHandler(
+    private static func makeDailyEveningActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        TGCallbackQueryHandler(
             pattern: Constants.dailyReportEveningActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
@@ -124,16 +138,18 @@ final class DefaultBotHandlers {
 
                 askAboutWeeklyActivity(ofUserWithId: userId)
         }
+    }
 
-        let dailyEveningActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeDailyEveningActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.dailyReportEveningActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 askAboutWeeklyActivity(ofUserWithId: userId)
         }
+    }
 
-        // Handle weekly activities replies
-
-        let weeklyActivityYesButtonHandler = TGCallbackQueryHandler(
+    private static func makeWeeklyActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.weeklyActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
@@ -150,16 +166,18 @@ final class DefaultBotHandlers {
 
                 askAboutMonthlyActivity(ofUserWithId: userId)
         }
+    }
 
-        let weeklyActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeWeeklyActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.weeklyActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 askAboutMonthlyActivity(ofUserWithId: userId)
         }
+    }
 
-        // Handle monthly activities replies
-
-        let monthlyActivityYesButtonHandler = TGCallbackQueryHandler(
+    private static func makeMonthlyActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.monthlyActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
@@ -176,16 +194,18 @@ final class DefaultBotHandlers {
 
                 askAboutHeroActivity(ofUserWithId: userId)
         }
+    }
 
-        let monthlyActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeMonthlyActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.monthlyActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 askAboutHeroActivity(ofUserWithId: userId)
         }
+    }
 
-        // Handle hero activities replies
-
-        let heroActivityYesButtonHandler = TGCallbackQueryHandler(
+    private static func makeHeroActivityYesButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.heroActivityYes) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
 
@@ -202,27 +222,14 @@ final class DefaultBotHandlers {
 
                 sendReport(toUserWithId: userId)
         }
+    }
 
-        let heroActivityNoButtonHandler = TGCallbackQueryHandler(
+    private static func makeHeroActivityNoButtonHandler() -> TGCallbackQueryHandler {
+        return TGCallbackQueryHandler(
             pattern: Constants.heroActivityNo) { update, bot in
                 let userId = update.callbackQuery!.message!.chat.id
                 sendReport(toUserWithId: userId)
         }
-
-        // Registering handlers
-
-        bot.connection.dispatcher.add(dailyMorningActivityYesButtonHandler)
-        bot.connection.dispatcher.add(dailyMorningActivityNoButtonHandler)
-        bot.connection.dispatcher.add(dailyLunchActivityYesButtonHandler)
-        bot.connection.dispatcher.add(dailyLunchActivityNoButtonHandler)
-        bot.connection.dispatcher.add(dailyEveningActivityYesButtonHandler)
-        bot.connection.dispatcher.add(dailyEveningActivityNoButtonHandler)
-        bot.connection.dispatcher.add(weeklyActivityYesButtonHandler)
-        bot.connection.dispatcher.add(weeklyActivityNoButtonHandler)
-        bot.connection.dispatcher.add(monthlyActivityYesButtonHandler)
-        bot.connection.dispatcher.add(monthlyActivityNoButtonHandler)
-        bot.connection.dispatcher.add(heroActivityYesButtonHandler)
-        bot.connection.dispatcher.add(heroActivityNoButtonHandler)
     }
 
     private static func setupActivities() {
@@ -232,28 +239,28 @@ final class DefaultBotHandlers {
     private static func setupDailyActivities() {
         dailyMorningActivityTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at("10:00")
+            .at(Constants.morningReminderTime)
             .do(queue: .global()) {
             handleDailyMorningActivity()
         }
 
         dailyLunchActivityTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at("14:00")
+            .at(Constants.lunchReminderTime)
             .do(queue: .global()) {
             handleDailyLunchActivity()
         }
 
         dailyEveningActivityTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at("19:00")
+            .at(Constants.eveningReminderTime)
             .do(queue: .global()) {
             handleDailyEveningActivity()
         }
 
         dailyReportTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at("22:00")
+            .at(Constants.surveyTime)
             .do(queue: .global()) {
             handleReport()
         }
@@ -579,6 +586,11 @@ final class DefaultBotHandlers {
         static let monthlyActivityNo = "monthlyActivityNo"
         static let heroActivityYes = "heroActivityYes"
         static let heroActivityNo = "heroActivityNo"
+
+        static let morningReminderTime = "10:00"
+        static let lunchReminderTime = "14:00"
+        static let eveningReminderTime = "19:00"
+        static let surveyTime = "22:00"
 
         static let dailyActivityScore = 1
         static let weeklyActivityScore = 5
