@@ -19,7 +19,13 @@ final class DefaultBotHandlers {
         self.bot = bot
 
         setupStartHandler(app: app, bot: bot)
+        setupHelpHandler(app: app, bot: bot)
+        setupDailyProgressHandler(app: app, bot: bot)
+        setupWeeklyProgressHandler(app: app, bot: bot)
+        setupMonthlyProgressHandler(app: app, bot: bot)
+
         setupButtonsActionHandler(app: app, bot: bot)
+
         setupActivities()
     }
 
@@ -39,6 +45,75 @@ final class DefaultBotHandlers {
                 sendMessage(
                     toUserWithId: update.message!.chat.id,
                     message: "Приветствую, я буду помогать тебе следить за качеством отношений с твоей женщиной.\n- Я буду напоминать о ежедневных, еженедельных и ежемесячных вещах, которые ты должен делать, чтобы проявлять о ней заботу и чтобы она чувствовала себя защищенной\n- Я буду проводить опрос о том, что ты сделал за день, неделю, месяц\n- На основании этих опросов мы будем следить насколько ты был плох или хорош, прогессируют ли ваши отношения или ухудшаются\n- Ты будешь набирать баллы (тактико-технические действие, ТТД, как у Лобановского в футболе)\n- Также я буду периодически присылать обучающий конент, чтобы ты понимал почему делать те или иные вещи важно, что чувствуют мужчины и женщины при тех или иных событиях и как себя более правильно вести\n- Все будет хорошо, но нужно немного поработать, результат зависит от тебя"
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/help"
+    private static func setupHelpHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+            sendMessage(
+                toUserWithId: update.message!.chat.id,
+                message: "/dailyProgress - Показать динамику по дням\n/weeklyProgress - Показать динамику по неделям\n/monthlyProgress - Показать динамику по месяцам"
+            )
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/dailyProgress"
+    private static func setupDailyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+            _Concurrency.Task {
+                let dailyProgress = await calculateDailyProgressScore(ofUserWithId: update.message!.chat.id)
+                let formattedDailyProgress = formatProgress(dailyProgress)
+
+                let message = "Динамика по дням: \(formattedDailyProgress) ТТД"
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/weeklyProgress"
+    private static func setupWeeklyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+            _Concurrency.Task {
+                let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: update.message!.chat.id)
+                let formattedWeeklyProgress = formatProgress(weeklyProgress)
+
+                let message = "Динамика по неделям: \(formattedWeeklyProgress) ТТД"
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/monthlyProgress"
+    private static func setupMonthlyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+            _Concurrency.Task {
+                let monthlyProgress = await calculateMonthlyProgressScore(ofUserWithId: update.message!.chat.id)
+                let formattedMonthlyProgress = formatProgress(monthlyProgress)
+
+                let message = "Динамика по месяцам: \(formattedMonthlyProgress) ТТД"
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
                 )
             }
         }
@@ -419,6 +494,8 @@ final class DefaultBotHandlers {
             if let monthlyScore = await calculateMonthlyScoreIfNeeded(ofUserWithId: userId) {
                 message += "\nВ этом месяце было набрано \(monthlyScore) ТТД"
             }
+
+            message += "\nЧтобы просмотреть список всех доступных команд, введите /help"
 
             sendMessage(toUserWithId: userId, message: message)
 
