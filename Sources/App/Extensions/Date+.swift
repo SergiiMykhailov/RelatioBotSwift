@@ -58,6 +58,26 @@ extension Date {
                    considerToday: considerToday)
     }
 
+    var noon: Date {
+        return Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: self)!
+    }
+
+    func dayByOffsetting(numberOfDays: Int) -> Date {
+        return Calendar.current.date(
+            byAdding: .day,
+            value: numberOfDays,
+            to: noon
+        )!
+    }
+
+    func dayByOffsetting(numberOfMonths: Int) -> Date {
+        return Calendar.current.date(
+            byAdding: .month,
+            value: numberOfMonths,
+            to: noon
+        )!
+    }
+
     func get(
         _ direction: SearchDirection,
         _ weekDay: Weekday,

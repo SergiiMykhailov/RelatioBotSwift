@@ -404,8 +404,16 @@ final class DefaultBotHandlers {
 
             var message = "За сегодня было набрано \(dailyScore) ТТД"
 
+            let dailyProgress = await calculateDailyProgressScore(ofUserWithId: userId)
+            let formattedDailyProgress = formatProgress(dailyProgress)
+            message += "\nДинамика по дням: \(formattedDailyProgress) ТТД"
+
             if let weeklyScore = await calculateWeeklyScoreIfNeeded(ofUserWithId: userId) {
-                message += "\nНа этой неделе было набрано \(weeklyScore) ТТД"
+                message += "\n\nНа этой неделе было набрано \(weeklyScore) ТТД"
+
+                let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: userId)
+                let formattedWeeklyProgress = formatProgress(weeklyProgress)
+                message += "\nДинамика по неделям: \(formattedWeeklyProgress) ТТД"
             }
 
             if let monthlyScore = await calculateMonthlyScoreIfNeeded(ofUserWithId: userId) {
@@ -503,6 +511,126 @@ final class DefaultBotHandlers {
         return result
     }
 
+    private static func calculateDailyProgressScore(
+        ofUserWithId userId: Int64
+    ) async -> [Int] {
+        var result = [Int]()
+
+        for itemIndex in 0..<Constants.dailyProgressItemsCount {
+            let daysOffset = -itemIndex
+            let referenceDay = Date.today().dayByOffsetting(numberOfDays: daysOffset)
+
+            let referenceDayResult = await calculateAllActivitiesScore(
+                ofUserWithId: userId,
+                fromTimestamp: referenceDay.startOfDay.timeIntervalSince1970,
+                toTimestamp: referenceDay.endOfDay.timeIntervalSince1970
+            )
+
+            result.append(referenceDayResult)
+        }
+
+        result = trimEmptyEntries(from: result)
+
+        return result
+    }
+
+    private static func calculateWeeklyProgressScore(
+        ofUserWithId userId: Int64
+    ) async -> [Int] {
+        var result = [Int]()
+
+        for itemIndex in 0..<Constants.weeklyProgressItemsCount {
+            let daysOffset = -itemIndex * Constants.daysPerWeek
+            let referenceWeekDay = Date.today().dayByOffsetting(numberOfDays: daysOffset)
+
+            let referenceDayResult = await calculateAllActivitiesScore(
+                ofUserWithId: userId,
+                fromTimestamp: referenceWeekDay.startOfWeek.timeIntervalSince1970,
+                toTimestamp: referenceWeekDay.endOfWeek.timeIntervalSince1970
+            )
+
+            result.append(referenceDayResult)
+        }
+
+        result = trimEmptyEntries(from: result)
+
+        return result
+    }
+
+    private static func calculateMonthlyProgressScore(
+        ofUserWithId userId: Int64
+    ) async -> [Int] {
+        var result = [Int]()
+
+        for itemIndex in 0..<Constants.monthlyProgressItemsCount {
+            let monthsOffset = -itemIndex
+            let referenceMonthDay = Date.today().dayByOffsetting(numberOfMonths: monthsOffset)
+
+            let referenceMonthResult = await calculateAllActivitiesScore(
+                ofUserWithId: userId,
+                fromTimestamp: referenceMonthDay.startOfMonth.timeIntervalSince1970,
+                toTimestamp: referenceMonthDay.endOfMonth.timeIntervalSince1970
+            )
+
+            result.append(referenceMonthResult)
+        }
+
+        result = trimEmptyEntries(from: result)
+
+        return result
+    }
+
+    private static func trimEmptyEntries(
+        from sourceEntries: [Int]
+    ) -> [Int] {
+        var result = [Int]()
+
+        for outerLoopIndex in 0..<sourceEntries.count {
+            let currentItem = sourceEntries[outerLoopIndex]
+
+            if currentItem != 0 {
+                result.append(currentItem)
+                continue
+            }
+
+            // Check if all succeeding items are zero.
+            // If they are then do not add current item and terminate the process.
+            // Otherwise add current item and continue.
+            var areAllSucceedingItemsZero = true
+            for innerLoopIndex in (outerLoopIndex + 1)..<sourceEntries.count {
+                let remainingItem = sourceEntries[innerLoopIndex]
+                if remainingItem != 0 {
+                    areAllSucceedingItemsZero = false
+                    break
+                }
+            }
+
+            if areAllSucceedingItemsZero {
+                break
+            }
+
+            result.append(currentItem)
+        }
+
+        return result
+    }
+
+    private static func formatProgress(_ progressItems: [Int]) -> String {
+        var result = ""
+
+        for itemIndex in 0..<progressItems.count {
+            let currentItem = progressItems[itemIndex]
+
+            result += "\(currentItem)"
+
+            if (itemIndex < progressItems.count - 1) {
+                result += " - "
+            }
+        }
+
+        return result
+    }
+
     private static func calculateWeeklyScoreIfNeeded(
         ofUserWithId userId: Int64
     ) async -> Int? {
@@ -596,5 +724,10 @@ final class DefaultBotHandlers {
         static let weeklyActivityScore = 5
         static let monthlyActivityScore = 15
         static let heroActivityScore = 50
+
+        static let dailyProgressItemsCount = 10
+        static let weeklyProgressItemsCount = 10
+        static let monthlyProgressItemsCount = 10
+        static let daysPerWeek = 7
     }
 }
