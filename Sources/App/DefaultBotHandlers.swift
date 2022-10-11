@@ -69,13 +69,10 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.dailyProgress]) { update, bot in
             _Concurrency.Task {
                 let dailyProgress = await calculateDailyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedDailyProgress = formatDailyProgress(dailyProgress)
-
-                let message = "Динамика по дням: \(formattedDailyProgress) ТТД"
 
                 sendMessage(
                     toUserWithId: update.message!.chat.id,
-                    message: message
+                    message: formatDailyProgress(dailyProgress)
                 )
             }
         }
@@ -88,13 +85,10 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.weeklyProgress]) { update, bot in
             _Concurrency.Task {
                 let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedWeeklyProgress = formatWeeklyProgress(weeklyProgress)
-
-                let message = "Динамика по неделям: \(formattedWeeklyProgress) ТТД"
 
                 sendMessage(
                     toUserWithId: update.message!.chat.id,
-                    message: message
+                    message: formatWeeklyProgress(weeklyProgress)
                 )
             }
         }
@@ -107,13 +101,10 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.monthlyProgress]) { update, bot in
             _Concurrency.Task {
                 let monthlyProgress = await calculateMonthlyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedMonthlyProgress = formatMonthlyProgress(monthlyProgress)
-
-                let message = "Динамика по месяцам: \(formattedMonthlyProgress) ТТД"
 
                 sendMessage(
                     toUserWithId: update.message!.chat.id,
-                    message: message
+                    message: formatMonthlyProgress(monthlyProgress)
                 )
             }
         }
@@ -496,7 +487,7 @@ final class DefaultBotHandlers {
                 message += "\n\(formatMonthlyProgress(monthlyProgress))"
             }
 
-            message += "\nЧтобы просмотреть список всех доступных команд, введите /help"
+            message += "\n\nЧтобы просмотреть список всех доступных команд, введите /help"
 
             sendMessage(toUserWithId: userId, message: message)
 
@@ -694,15 +685,15 @@ final class DefaultBotHandlers {
     }
 
     private static func formatDailyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по дням (от сегодняшнего и назад):", progressItems)
+        return formatProgress(withPrefix: "Динамика по дням (от сегодняшнего и назад): ", progressItems)
     }
 
     private static func formatWeeklyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по неделям (от текущей и назад):", progressItems)
+        return formatProgress(withPrefix: "Динамика по неделям (от текущей и назад): ", progressItems)
     }
 
     private static func formatMonthlyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по месяцам (от текущего и назад):", progressItems)
+        return formatProgress(withPrefix: "Динамика по месяцам (от текущего и назад): ", progressItems)
     }
 
     private static func formatProgress(
