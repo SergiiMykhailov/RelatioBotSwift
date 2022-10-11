@@ -69,7 +69,7 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.dailyProgress]) { update, bot in
             _Concurrency.Task {
                 let dailyProgress = await calculateDailyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedDailyProgress = formatProgress(dailyProgress)
+                let formattedDailyProgress = formatDailyProgress(dailyProgress)
 
                 let message = "Динамика по дням: \(formattedDailyProgress) ТТД"
 
@@ -88,7 +88,7 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.weeklyProgress]) { update, bot in
             _Concurrency.Task {
                 let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedWeeklyProgress = formatProgress(weeklyProgress)
+                let formattedWeeklyProgress = formatWeeklyProgress(weeklyProgress)
 
                 let message = "Динамика по неделям: \(formattedWeeklyProgress) ТТД"
 
@@ -107,7 +107,7 @@ final class DefaultBotHandlers {
         let handler = TGCommandHandler(commands: [Commands.monthlyProgress]) { update, bot in
             _Concurrency.Task {
                 let monthlyProgress = await calculateMonthlyProgressScore(ofUserWithId: update.message!.chat.id)
-                let formattedMonthlyProgress = formatProgress(monthlyProgress)
+                let formattedMonthlyProgress = formatMonthlyProgress(monthlyProgress)
 
                 let message = "Динамика по месяцам: \(formattedMonthlyProgress) ТТД"
 
@@ -480,19 +480,20 @@ final class DefaultBotHandlers {
             var message = "За сегодня было набрано \(dailyScore) ТТД"
 
             let dailyProgress = await calculateDailyProgressScore(ofUserWithId: userId)
-            let formattedDailyProgress = formatProgress(dailyProgress)
-            message += "\nДинамика по дням: \(formattedDailyProgress) ТТД"
+            message += "\n\(formatDailyProgress(dailyProgress))"
 
             if let weeklyScore = await calculateWeeklyScoreIfNeeded(ofUserWithId: userId) {
                 message += "\n\nНа этой неделе было набрано \(weeklyScore) ТТД"
 
                 let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: userId)
-                let formattedWeeklyProgress = formatProgress(weeklyProgress)
-                message += "\nДинамика по неделям: \(formattedWeeklyProgress) ТТД"
+                message += "\n\(formatWeeklyProgress(weeklyProgress))"
             }
 
             if let monthlyScore = await calculateMonthlyScoreIfNeeded(ofUserWithId: userId) {
                 message += "\nВ этом месяце было набрано \(monthlyScore) ТТД"
+
+                let monthlyProgress = await calculateMonthlyProgressScore(ofUserWithId: userId)
+                message += "\n\(formatMonthlyProgress(monthlyProgress))"
             }
 
             message += "\nЧтобы просмотреть список всех доступных команд, введите /help"
@@ -692,8 +693,23 @@ final class DefaultBotHandlers {
         return result
     }
 
-    private static func formatProgress(_ progressItems: [Int]) -> String {
-        var result = ""
+    private static func formatDailyProgress(_ progressItems: [Int]) -> String {
+        return formatProgress(withPrefix: "Динамика по дням (от сегодняшнего и назад):", progressItems)
+    }
+
+    private static func formatWeeklyProgress(_ progressItems: [Int]) -> String {
+        return formatProgress(withPrefix: "Динамика по неделям (от текущей и назад):", progressItems)
+    }
+
+    private static func formatMonthlyProgress(_ progressItems: [Int]) -> String {
+        return formatProgress(withPrefix: "Динамика по месяцам (от текущего и назад):", progressItems)
+    }
+
+    private static func formatProgress(
+        withPrefix prefix: String,
+        _ progressItems: [Int]
+    ) -> String {
+        var result = prefix
 
         for itemIndex in 0..<progressItems.count {
             let currentItem = progressItems[itemIndex]
@@ -704,6 +720,8 @@ final class DefaultBotHandlers {
                 result += " - "
             }
         }
+
+        result += " ТТД"
 
         return result
     }
