@@ -54,10 +54,10 @@ final class DefaultBotHandlers {
 
     /// add handler for command "/help"
     private static func setupHelpHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+        let handler = TGCommandHandler(commands: [Commands.help]) { update, bot in
             sendMessage(
                 toUserWithId: update.message!.chat.id,
-                message: "/dailyProgress - Показать динамику по дням\n/weeklyProgress - Показать динамику по неделям\n/monthlyProgress - Показать динамику по месяцам"
+                message: "\(Commands.dailyProgress) - Показать динамику по дням\n\(Commands.weeklyProgress) - Показать динамику по неделям\n\(Commands.monthlyProgress) - Показать динамику по месяцам"
             )
         }
 
@@ -66,7 +66,7 @@ final class DefaultBotHandlers {
 
     /// add handler for command "/dailyProgress"
     private static func setupDailyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+        let handler = TGCommandHandler(commands: [Commands.dailyProgress]) { update, bot in
             _Concurrency.Task {
                 let dailyProgress = await calculateDailyProgressScore(ofUserWithId: update.message!.chat.id)
                 let formattedDailyProgress = formatProgress(dailyProgress)
@@ -85,7 +85,7 @@ final class DefaultBotHandlers {
 
     /// add handler for command "/weeklyProgress"
     private static func setupWeeklyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+        let handler = TGCommandHandler(commands: [Commands.weeklyProgress]) { update, bot in
             _Concurrency.Task {
                 let weeklyProgress = await calculateWeeklyProgressScore(ofUserWithId: update.message!.chat.id)
                 let formattedWeeklyProgress = formatProgress(weeklyProgress)
@@ -104,7 +104,7 @@ final class DefaultBotHandlers {
 
     /// add handler for command "/monthlyProgress"
     private static func setupMonthlyProgressHandler(app: Vapor.Application, bot: TGBotPrtcl) {
-        let handler = TGCommandHandler(commands: [Commands.start]) { update, bot in
+        let handler = TGCommandHandler(commands: [Commands.monthlyProgress]) { update, bot in
             _Concurrency.Task {
                 let monthlyProgress = await calculateMonthlyProgressScore(ofUserWithId: update.message!.chat.id)
                 let formattedMonthlyProgress = formatProgress(monthlyProgress)
@@ -776,6 +776,10 @@ final class DefaultBotHandlers {
 
     private enum Commands {
         static let start = "/start"
+        static let help = "/help"
+        static let dailyProgress = "/dailyProgress"
+        static let weeklyProgress = "/weeklyProgress"
+        static let monthlyProgress = "/monthlyProgress"
     }
 
     private enum Constants {
