@@ -3,6 +3,7 @@ import Logging
 import telegram_vapor_bot
 import Schedule
 import SQLite
+import CoreFoundation
 
 final class DefaultBotHandlers {
 
@@ -20,9 +21,15 @@ final class DefaultBotHandlers {
 
         setupStartHandler(app: app, bot: bot)
         setupHelpHandler(app: app, bot: bot)
+
         setupDailyProgressHandler(app: app, bot: bot)
         setupWeeklyProgressHandler(app: app, bot: bot)
         setupMonthlyProgressHandler(app: app, bot: bot)
+        
+        setupTotalUsersCountHandler(app: app, bot: bot)
+        setupDailyActiveUsersHandler(app: app, bot: bot)
+        setupWeeklyActiveUsersHandler(app: app, bot: bot)
+        setupMonthlyActiveUsersHandler(app: app, bot: bot)
 
         setupButtonsActionHandler(app: app, bot: bot)
 
@@ -105,6 +112,130 @@ final class DefaultBotHandlers {
                 sendMessage(
                     toUserWithId: update.message!.chat.id,
                     message: formatMonthlyProgress(monthlyProgress)
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/totalUsersCount"
+    private static func setupTotalUsersCountHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.totalUsersCount]) { update, bot in
+            _Concurrency.Task {
+                let registeredUsers = await usersRepository!.loadUsers()
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: "Всего зарегистрировано пользователей: \(registeredUsers.count)"
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/dau"
+    private static func setupDailyActiveUsersHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.dailyActiveUsers]) { update, bot in
+            _Concurrency.Task {
+                var result = [Int]()
+
+                for itemIndex in 0..<Constants.dailyProgressItemsCount {
+                    let daysOffset = -itemIndex
+                    let referenceDay = Date.today().dayByOffsetting(numberOfDays: daysOffset)
+
+                    let referenceDayResult = await calculateActiveUsers(
+                        fromTimestamp: referenceDay.startOfDay.timeIntervalSince1970,
+                        toTimestamp: referenceDay.endOfDay.timeIntervalSince1970
+                    )
+
+                    result.append(referenceDayResult)
+                }
+
+                result = trimEmptyEntries(from: result)
+
+                let message = formatSequence(
+                    withPrefix: "Активные пользователи по дням (от текущего и назад): ",
+                    result,
+                    suffix: ""
+                )
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/wau"
+    private static func setupWeeklyActiveUsersHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.weeklyActiveUsers]) { update, bot in
+            _Concurrency.Task {
+                var result = [Int]()
+
+                for itemIndex in 0..<Constants.weeklyProgressItemsCount {
+                    let daysOffset = -itemIndex * Constants.daysPerWeek
+                    let referenceWeekDay = Date.today().dayByOffsetting(numberOfDays: daysOffset)
+
+                    let referenceWeekResult = await calculateActiveUsers(
+                        fromTimestamp: referenceWeekDay.startOfWeek.timeIntervalSince1970,
+                        toTimestamp: referenceWeekDay.endOfWeek.timeIntervalSince1970
+                    )
+
+                    result.append(referenceWeekResult)
+                }
+
+                result = trimEmptyEntries(from: result)
+
+                let message = formatSequence(
+                    withPrefix: "Активные пользователи по неделям (от текущей и назад): ",
+                    result,
+                    suffix: ""
+                )
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
+                )
+            }
+        }
+
+        bot.connection.dispatcher.add(handler)
+    }
+
+    /// add handler for command "/mau"
+    private static func setupMonthlyActiveUsersHandler(app: Vapor.Application, bot: TGBotPrtcl) {
+        let handler = TGCommandHandler(commands: [Commands.monthlyActiveUsers]) { update, bot in
+            _Concurrency.Task {
+                var result = [Int]()
+
+                for itemIndex in 0..<Constants.monthlyProgressItemsCount {
+                    let monthsOffset = -itemIndex
+                    let referenceMonthDay = Date.today().dayByOffsetting(numberOfMonths: monthsOffset)
+
+                    let referenceMonthResult = await calculateActiveUsers(
+                        fromTimestamp: referenceMonthDay.startOfMonth.timeIntervalSince1970,
+                        toTimestamp: referenceMonthDay.endOfMonth.timeIntervalSince1970
+                    )
+
+                    result.append(referenceMonthResult)
+                }
+
+                result = trimEmptyEntries(from: result)
+
+                let message = formatSequence(
+                    withPrefix: "Активные пользователи по месяцам (от текущего и назад): ",
+                    result,
+                    suffix: ""
+                )
+
+                sendMessage(
+                    toUserWithId: update.message!.chat.id,
+                    message: message
                 )
             }
         }
@@ -684,21 +815,59 @@ final class DefaultBotHandlers {
         return result
     }
 
+    private static func calculateActiveUsers(
+        fromTimestamp: TimeInterval,
+        toTimestamp: TimeInterval
+    ) async -> Int {
+        var result = 0
+
+        let registeredUsers = await usersRepository!.loadUsers()
+
+        for user in registeredUsers {
+            if let chatId = Int64(user.id) {
+                let userActivities = await activitiesRepository!.loadActivities(
+                    ofUserWithId: "\(chatId)",
+                    fromTimestamp: Int(fromTimestamp),
+                    toTimestamp: Int(toTimestamp)
+                )
+
+                if !userActivities.isEmpty {
+                    result += 1
+                }
+            }
+        }
+
+        return result
+    }
+
     private static func formatDailyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по дням (от сегодняшнего и назад): ", progressItems)
+        return formatSequence(
+            withPrefix: "Динамика по дням (от сегодняшнего и назад): ",
+            progressItems,
+            suffix: " ТТД"
+        )
     }
 
     private static func formatWeeklyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по неделям (от текущей и назад): ", progressItems)
+        return formatSequence(
+            withPrefix: "Динамика по неделям (от текущей и назад): ",
+            progressItems,
+            suffix: " ТТД"
+        )
     }
 
     private static func formatMonthlyProgress(_ progressItems: [Int]) -> String {
-        return formatProgress(withPrefix: "Динамика по месяцам (от текущего и назад): ", progressItems)
+        return formatSequence(
+            withPrefix: "Динамика по месяцам (от текущего и назад): ",
+            progressItems,
+            suffix: " ТТД"
+        )
     }
 
-    private static func formatProgress(
+    private static func formatSequence(
         withPrefix prefix: String,
-        _ progressItems: [Int]
+        _ progressItems: [Int],
+        suffix: String
     ) -> String {
         var result = prefix
 
@@ -712,7 +881,7 @@ final class DefaultBotHandlers {
             }
         }
 
-        result += " ТТД"
+        result += suffix
 
         return result
     }
@@ -786,9 +955,15 @@ final class DefaultBotHandlers {
     private enum Commands {
         static let start = "/start"
         static let help = "/help"
+
         static let dailyProgress = "/dailyProgress"
         static let weeklyProgress = "/weeklyProgress"
         static let monthlyProgress = "/monthlyProgress"
+
+        static let totalUsersCount = "/totalUsersCount"
+        static let dailyActiveUsers = "/dau"
+        static let weeklyActiveUsers = "/wau"
+        static let monthlyActiveUsers = "/mau"
     }
 
     private enum Constants {
