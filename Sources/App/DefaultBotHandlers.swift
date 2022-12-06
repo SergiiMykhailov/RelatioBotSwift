@@ -434,26 +434,26 @@ final class DefaultBotHandlers {
     }
 
     private static func setupDailyActivities() {
-        dailyMorningActivityTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.morningReminderTime)
-            .do(queue: .global()) {
-            handleDailyMorningActivity()
-        }
-
-        dailyLunchActivityTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.lunchReminderTime)
-            .do(queue: .global()) {
-            handleDailyLunchActivity()
-        }
-
-        dailyEveningActivityTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.eveningReminderTime)
-            .do(queue: .global()) {
-            handleDailyEveningActivity()
-        }
+//        dailyMorningActivityTask = Plan.every(
+//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+//            .at(Constants.morningReminderTime)
+//            .do(queue: .global()) {
+//            handleDailyMorningActivity()
+//        }
+//
+//        dailyLunchActivityTask = Plan.every(
+//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+//            .at(Constants.lunchReminderTime)
+//            .do(queue: .global()) {
+//            handleDailyLunchActivity()
+//        }
+//
+//        dailyEveningActivityTask = Plan.every(
+//            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+//            .at(Constants.eveningReminderTime)
+//            .do(queue: .global()) {
+//            handleDailyEveningActivity()
+//        }
 
         dailyReportTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
