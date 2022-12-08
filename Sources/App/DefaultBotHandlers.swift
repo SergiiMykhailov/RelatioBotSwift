@@ -439,28 +439,28 @@ final class DefaultBotHandlers {
 //        dailyMorningActivityTask = Plan.every(
 //            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
 //            .at(Constants.morningReminderTime)
-//            .do(queue: .global()) {
+//            .do(queue: .main) {
 //            handleDailyMorningActivity()
 //        }
 //
 //        dailyLunchActivityTask = Plan.every(
 //            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
 //            .at(Constants.lunchReminderTime)
-//            .do(queue: .global()) {
+//            .do(queue: .main) {
 //            handleDailyLunchActivity()
 //        }
 //
 //        dailyEveningActivityTask = Plan.every(
 //            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
 //            .at(Constants.eveningReminderTime)
-//            .do(queue: .global()) {
+//            .do(queue: .main) {
 //            handleDailyEveningActivity()
 //        }
 
         dailyReportTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
             .at(Constants.surveyTime)
-            .do(queue: .global()) {
+            .do(queue: .main) {
             handleReport()
         }
     }
