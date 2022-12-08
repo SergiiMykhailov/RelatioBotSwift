@@ -434,6 +434,8 @@ final class DefaultBotHandlers {
     }
 
     private static func setupDailyActivities() {
+        log("[ACTIVITY] - Setting up daily activities")
+
 //        dailyMorningActivityTask = Plan.every(
 //            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
 //            .at(Constants.morningReminderTime)
