@@ -436,6 +436,7 @@ final class DefaultBotHandlers {
     private static func setupDailyActivities() {
         log("[ACTIVITY] - Setting up daily activities")
 
+        DispatchQueue.global().async {
 //        dailyMorningActivityTask = Plan.every(
 //            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
 //            .at(Constants.morningReminderTime)
@@ -457,11 +458,12 @@ final class DefaultBotHandlers {
 //            handleDailyEveningActivity()
 //        }
 
-        dailyReportTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.surveyTime)
-            .do(queue: .main) {
-            handleReport()
+            dailyReportTask = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at(Constants.surveyTime)
+                .do(queue: .global()) {
+                handleReport()
+            }
         }
     }
 
