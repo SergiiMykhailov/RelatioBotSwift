@@ -484,8 +484,10 @@ final class DefaultBotHandlers {
 
     private static func handleReport() {
         log("[ACTIVITY] - Handling daily reports")
+
         foreachUser { userId in
-            askAboutDailyMorningActivity(ofUserWithId: userId)
+            log("[ACTIVITY] - Processing user [\(userId)]")
+//            askAboutDailyMorningActivity(ofUserWithId: userId)
         }
     }
 
@@ -622,14 +624,14 @@ final class DefaultBotHandlers {
                 message += "\n\(formatMonthlyProgress(monthlyProgress))"
             }
 
-            let videoOfTheDayUrl = Constants.videos[Int.random(in: 0..<Constants.videos.count)]
-            message += "\n\nВидео дня: \(videoOfTheDayUrl)"
+//            let videoOfTheDayUrl = Constants.videos[Int.random(in: 0..<Constants.videos.count)]
+//            message += "\n\nВидео дня: \(videoOfTheDayUrl)"
 
             message += "\n\nЧтобы просмотреть список всех доступных команд, введите /help"
 
             sendMessage(toUserWithId: userId, message: message)
 
-            log(" [ACTIVITY] - Sent report to user [\(userId)]")
+            log("[ACTIVITY] - Sent report to user [\(userId)]")
         }
     }
 
