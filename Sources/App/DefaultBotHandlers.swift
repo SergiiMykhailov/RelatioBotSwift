@@ -18,6 +18,7 @@ final class DefaultBotHandlers {
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
         self.bot = bot
+        self.logger = app.logger
 
         setupStartHandler(app: app, bot: bot)
         setupHelpHandler(app: app, bot: bot)
@@ -463,6 +464,174 @@ final class DefaultBotHandlers {
                 .at(Constants.surveyTime)
                 .do(queue: .global()) {
                 handleReport()
+            }
+
+            task1 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("00:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task2 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("01:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task3 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("02:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task4 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("03:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task5 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("04:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task6 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("05:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task7 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("06:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task8 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("07:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task9 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("08:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task10 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("09:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task11 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("10:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task12 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("11:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task13 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("12:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task14 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("13:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task15 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("14:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task16 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("15:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task17 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("16:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task18 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("17:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task19 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("18:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task20 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("19:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task21 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("20:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task22 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("21:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task23 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("22:00")
+                .do(queue: .global()) {
+                log("TICK")
+            }
+
+            task24 = Plan.every(
+                .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
+                .at("23:00")
+                .do(queue: .global()) {
+                log("TICK")
             }
         }
     }
@@ -942,12 +1111,10 @@ final class DefaultBotHandlers {
     }
 
     private static func log(_ message: String) {
-        let logger = Logger(label: "RelatioBotSwift")
-
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let dateString = formatter.string(from: Date())
-        logger.info("\(dateString): \(message)")
+        logger?.info("\(dateString): \(message)")
     }
 
     // MARK: - Internal fields
@@ -955,11 +1122,37 @@ final class DefaultBotHandlers {
     private static var usersRepository: UsersRepository?
     private static var activitiesRepository: ActivitiesRepository?
     private static var bot: TGBotPrtcl?
+    private static var logger: Logger?
 
     private static var dailyMorningActivityTask: Schedule.Task!
     private static var dailyLunchActivityTask: Schedule.Task!
     private static var dailyEveningActivityTask: Schedule.Task!
     private static var dailyReportTask: Schedule.Task!
+
+    private static var task1: Schedule.Task!
+    private static var task2: Schedule.Task!
+    private static var task3: Schedule.Task!
+    private static var task4: Schedule.Task!
+    private static var task5: Schedule.Task!
+    private static var task6: Schedule.Task!
+    private static var task7: Schedule.Task!
+    private static var task8: Schedule.Task!
+    private static var task9: Schedule.Task!
+    private static var task10: Schedule.Task!
+    private static var task11: Schedule.Task!
+    private static var task12: Schedule.Task!
+    private static var task13: Schedule.Task!
+    private static var task14: Schedule.Task!
+    private static var task15: Schedule.Task!
+    private static var task16: Schedule.Task!
+    private static var task17: Schedule.Task!
+    private static var task18: Schedule.Task!
+    private static var task19: Schedule.Task!
+    private static var task20: Schedule.Task!
+    private static var task21: Schedule.Task!
+    private static var task22: Schedule.Task!
+    private static var task23: Schedule.Task!
+    private static var task24: Schedule.Task!
 
     private enum Commands {
         static let start = "/start"
