@@ -1,9 +1,13 @@
+import Foundation
 import App
-import Vapor
 
-var env = try Environment.detect()
-try LoggingSystem.bootstrap(from: &env)
-let app = Application(env)
-defer { app.shutdown() }
-try configure(app)
-try app.run()
+guard let databaseConnection = SQLiteDefaultConnectionProvider.instance.connection else {
+    exit(1)
+}
+
+let bot = Bot(
+    withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
+    activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection)
+)
+
+bot.run()

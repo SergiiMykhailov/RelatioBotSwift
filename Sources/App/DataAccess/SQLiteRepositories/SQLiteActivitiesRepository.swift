@@ -1,10 +1,10 @@
 import SQLite
 
-class SQLiteActivitiesRepository {
+public class SQLiteActivitiesRepository {
 
     // MARK: - Public methods and properties
 
-    init(withConnection connection: Connection) {
+    public init(withConnection connection: Connection) {
         self.connection = connection
     }
 
@@ -54,7 +54,7 @@ class SQLiteActivitiesRepository {
 
 extension SQLiteActivitiesRepository : ActivitiesRepository {
 
-    func registerActivity(_ activity: Activity) async -> Bool {
+    public func registerActivity(_ activity: Activity) async -> Bool {
         let table = setupTableIfNeeded()
 
         do {
@@ -74,7 +74,7 @@ extension SQLiteActivitiesRepository : ActivitiesRepository {
         }
     }
 
-    func loadActivities(
+    public func loadActivities(
         ofUserWithId userId: String,
         fromTimestamp: Int,
         toTimestamp: Int

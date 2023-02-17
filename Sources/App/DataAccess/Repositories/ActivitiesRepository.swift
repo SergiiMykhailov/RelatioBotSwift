@@ -1,4 +1,4 @@
-protocol ActivitiesRepository {
+public protocol ActivitiesRepository {
 
     func registerActivity(_ activity: Activity) async -> Bool
     func loadActivities(
