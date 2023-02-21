@@ -8,11 +8,14 @@ public final class Bot {
 
     public init(
         withUsersRepository usersRepository: UsersRepository,
-        activitiesRepository: ActivitiesRepository
+        activitiesRepository: ActivitiesRepository,
+        isStaging: Bool = false
     ) {
         self.usersRepository = usersRepository
         self.activitiesRepository = activitiesRepository
-        self.bot = TelegramBot(token: Constants.botToken)
+
+        let token = isStaging ? Constants.stagingToken : Constants.productionToken
+        self.bot = TelegramBot(token: token)
         self.router = Router(bot: bot)
 
         setupRoutes()
@@ -1009,7 +1012,8 @@ public final class Bot {
     }
 
     private enum Constants {
-        static let botToken = "5455319702:AAGIpKMjUdPsXW7rZOe5phxV492E5LrHnvg"
+        static let productionToken = "5455319702:AAGIpKMjUdPsXW7rZOe5phxV492E5LrHnvg"
+        static let stagingToken = "6163360177:AAHzaxJG8vMoZ5r85ynHDBddGkNV9i9UMEE"
 
         static let morningReminderTime = "10:00"
         static let lunchReminderTime = "14:00"

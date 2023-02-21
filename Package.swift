@@ -11,7 +11,8 @@ let package = Package(
         .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
         .package(
             url: "https://github.com/luoxiu/Schedule", .upToNextMajor(from: "2.0.0")
-        )
+        ),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
     ],
     targets: [
         .target(
@@ -19,7 +20,8 @@ let package = Package(
             dependencies: [
                 .product(name: "TelegramBotSDK", package: "TelegramBotSDK"),
                 .product(name: "SQLite", package: "SQLite.swift"),
-                .product(name: "Schedule", package: "Schedule")
+                .product(name: "Schedule", package: "Schedule"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of

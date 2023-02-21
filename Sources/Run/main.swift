@@ -1,13 +1,25 @@
 import Foundation
 import App
+import ArgumentParser
 
-guard let databaseConnection = SQLiteDefaultConnectionProvider.instance.connection else {
-    exit(1)
+struct Runner: ParsableCommand {
+    @Option var isStaging: Bool = false
+
+    func run() {
+        guard let databaseConnection = SQLiteDefaultConnectionProvider.instance.connection else {
+            return
+        }
+
+        let bot = Bot(
+            withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
+            activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection),
+            isStaging: isStaging
+        )
+
+        bot.run()
+    }
 }
 
-let bot = Bot(
-    withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
-    activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection)
-)
+Runner.main()
 
-bot.run()
+
