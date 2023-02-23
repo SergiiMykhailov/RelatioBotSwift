@@ -29,6 +29,8 @@ public final class Bot {
 
         isRunning = true
 
+        setupActivities()
+
         while let update = bot.nextUpdateSync() {
             _ = try? router.process(update: update)
         }
@@ -68,6 +70,9 @@ public final class Bot {
             withName: Commands.debugReport) { [weak self] context in
                 self?.handleReport()
             }
+        registerRoute(withName: Commands.ping) { [weak self] context in
+            self?.handlePing(withContext: context)
+        }
     }
 
     private func setupButtons() {
@@ -545,6 +550,17 @@ public final class Bot {
         }
     }
 
+    private func handlePing(withContext context: Context) {
+        guard let userId = context.fromId else {
+            return
+        }
+
+        bot.sendMessageAsync(
+            chatId: .chat(userId),
+            text: "pong"
+        )
+    }
+
     private func askAboutDailyMorningActivity(ofUserWithId userId: Int64) {
         type(of: self).log("[ACTIVITY] - Asking about morning activity of user [\(userId)]")
 
@@ -994,6 +1010,7 @@ public final class Bot {
         static let monthlyActiveUsers = "mau"
 
         static let debugReport = "debugReport"
+        static let ping = "ping"
     }
 
     private enum ButtonsIdentifiers {
