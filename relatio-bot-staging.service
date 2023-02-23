@@ -1,0 +1,20 @@
+[Unit]
+Description=RelatioBot keeps tracking personal relations (staging) 
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/RelatioBotSwiftStaging/.build/x86_64-unknown-linux-gnu/release
+ExecStart=/root/RelatioBotSwiftStaging/.build/x86_64-unknown-linux-gnu/release/Run --is-staging=true
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=RelatioBotSwiftStaging
+User=root
+Group=root
+Environment=PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/root/RelatioBotSwiftStaging/.build/x86_64-unknown-linux-gnu/release
+
+
+[Install]
+WantedBy=multi-user.target
