@@ -1,9 +1,6 @@
 import Foundation
 import App
 import ArgumentParser
-import Logging
-
-let sharedLogger = Logger(label: "relatio=bot")
 
 struct Runner: ParsableCommand {
     @Option var isStaging: Bool = false
@@ -13,8 +10,6 @@ struct Runner: ParsableCommand {
             return
         }
 
-        sharedLogger.info("Starting build: \(type(of: self).buildVersion)")
-
         let bot = Bot(
             withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
             activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection),
@@ -23,10 +18,6 @@ struct Runner: ParsableCommand {
 
         bot.run()
     }
-
-    // MARK: - Internal fields
-
-    private static let buildVersion = "Staging - 1"
 
 }
 

@@ -1,6 +1,7 @@
 import TelegramBotSDK
 import Schedule
 import Foundation
+import Logging
 
 public final class Bot {
 
@@ -17,6 +18,13 @@ public final class Bot {
         let token = isStaging ? Constants.stagingToken : Constants.productionToken
         self.bot = TelegramBot(token: token)
         self.router = Router(bot: bot)
+
+        var message = "Running build: 1"
+        if isStaging {
+            message += " (staging)"
+        }
+
+        type(of: self).log(message)
 
         setupRoutes()
         setupButtons()
@@ -154,6 +162,8 @@ public final class Bot {
     }
 
     private func setupActivities() {
+        type(of: self).log("Setting up activities")
+
         dailyReportTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
             .at(Constants.surveyTime)
@@ -984,7 +994,8 @@ public final class Bot {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let dateString = formatter.string(from: Date())
-        print("\(dateString): \(message)")
+
+        logger.info("\(dateString): \(message)")
     }
 
     // MARK: - Internal fields
@@ -995,6 +1006,8 @@ public final class Bot {
     private let router: Router
     private var isRunning = false
     private var dailyReportTask: Schedule.Task?
+
+    private static let logger = Logger(label: "relatio-bot")
 
     private enum Commands {
         static let start = "start"
