@@ -10,6 +10,8 @@ struct Runner: ParsableCommand {
             return
         }
 
+        print("Running build: \(type(of: self).buildVersion)")
+
         let bot = Bot(
             withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
             activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection),
@@ -18,6 +20,11 @@ struct Runner: ParsableCommand {
 
         bot.run()
     }
+
+    // MARK: - Internal fields
+
+    private static let buildVersion = "Staging - 1"
+
 }
 
 Runner.main()
