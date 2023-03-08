@@ -684,10 +684,10 @@ public final class Bot {
                 message += "\n\(formatMonthlyProgress(monthlyProgress))"
             }
 
-//            let videoOfTheDayUrl = Constants.videos[Int.random(in: 0..<Constants.videos.count)]
-//            message += "\n\nВидео дня: \(videoOfTheDayUrl)"
-
             message += "\n\nЧтобы просмотреть список всех доступных команд, введите /help"
+
+            let videoOfTheDayUrl = Constants.videos[Int.random(in: 0..<Constants.videos.count)]
+            message += "\n\nВидео дня: \(videoOfTheDayUrl)"
 
             bot.sendMessageAsync(
                 chatId: .chat(userId),
