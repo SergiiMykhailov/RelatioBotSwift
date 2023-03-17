@@ -19,13 +19,6 @@ public final class Bot {
         self.bot = TelegramBot(token: token)
         self.router = Router(bot: bot)
 
-        var message = "Running build: 1"
-        if isStaging {
-            message += " (staging)"
-        }
-
-        type(of: self).log(message)
-
         setupRoutes()
         setupButtons()
     }
@@ -84,6 +77,15 @@ public final class Bot {
     }
 
     private func setupButtons() {
+        registerButton(
+            withId: ButtonsIdentifiers.registerMaleUser) { [weak self] context in
+                self?.handleRegisteringMaleUser(withContext: context)
+            }
+        registerButton(
+            withId: ButtonsIdentifiers.registerFemaleUser) { [weak self] context in
+                self?.handleRegisteringFemaleUser(withContext: context)
+            }
+
         registerButton(
             withId: ButtonsIdentifiers.dailyReportMorningActivityYes) { [weak self] context in
                 self?.handleDailyMorningActivityYesButton(withContext: context)
@@ -192,17 +194,22 @@ public final class Bot {
             return
         }
 
-        let registeredAtTimestamp = Int(Date().timeIntervalSince1970)
-        let userToRegister = User(withId: "\(userId)", registeredAtTimestamp: registeredAtTimestamp)
+        let markup = InlineKeyboardMarkup(
+            inlineKeyboard: [
+                [
+                    InlineKeyboardButton(text: "Женский", callbackData: ButtonsIdentifiers.registerFemaleUser),
+                    InlineKeyboardButton(text: "Мужской", callbackData: ButtonsIdentifiers.registerMaleUser)
+                ]
+            ]
+        )
 
-        _Concurrency.Task {
-            _ = await usersRepository.registerUser(userToRegister)
+        let message = "Приветствую, я помогаю мужчинам и женщинам работать над качеством их отношений, чтобы сделать их счастливыми.\nПоскольку мужчинам и женщинам нужны разные вещи, чтобы чувствовать себя счастливыми, я буду присылать разные инструкции.\nДля этого мне нужно знать твой пол."
 
-            bot.sendMessageAsync(
-                chatId: .chat(userId),
-                text: "Приветствую, я буду помогать тебе следить за качеством отношений с твоей женщиной.\n- Я буду напоминать о ежедневных, еженедельных и ежемесячных вещах, которые ты должен делать, чтобы проявлять о ней заботу и чтобы она чувствовала себя защищенной\n- Я буду проводить опрос о том, что ты сделал за день, неделю, месяц\n- На основании этих опросов мы будем следить насколько ты был плох или хорош, прогессируют ли ваши отношения или ухудшаются\n- Ты будешь набирать баллы (тактико-технические действия, ТТД, как у Лобановского в футболе)\n- Также я буду периодически присылать обучающий контент, чтобы ты понимал почему делать те или иные вещи важно, что чувствуют мужчины и женщины при тех или иных событиях и как себя более правильно вести\n- Все будет хорошо, но нужно немного поработать, результат зависит только от тебя"
-            )
-        }
+        bot.sendMessageAsync(
+            chatId: .chat(userId),
+            text: message,
+            replyMarkup: ReplyMarkup.inlineKeyboardMarkup(markup)
+        )
     }
 
     private func handleHelp(withContext context: Context) {
@@ -382,6 +389,50 @@ public final class Bot {
     }
 
     // MARK: - Button handlers
+
+    private func handleRegisteringMaleUser(withContext context: Context) {
+        guard let userId = context.fromId else {
+            return
+        }
+
+        let registeredAtTimestamp = Int(Date().timeIntervalSince1970)
+        let userToRegister = User(
+            withId: "\(userId)",
+            gender: .male,
+            registeredAtTimestamp: registeredAtTimestamp
+        )
+
+        _Concurrency.Task {
+            _ = await usersRepository.registerUser(userToRegister)
+
+            bot.sendMessageAsync(
+                chatId: .chat(userId),
+                text: "Приветствую, я буду помогать тебе следить за качеством отношений с твоей женщиной.\n- Я буду напоминать о ежедневных, еженедельных и ежемесячных вещах, которые ты должен делать, чтобы проявлять о ней заботу и чтобы она чувствовала себя защищенной\n- Я буду проводить опрос о том, что ты сделал за день, неделю, месяц\n- На основании этих опросов мы будем следить насколько ты был плох или хорош, прогрессируют ли ваши отношения или ухудшаются\n- Ты будешь набирать баллы (тактико-технические действия, ТТД, как у Лобановского в футболе)\n- Также я буду периодически присылать обучающий контент, чтобы ты понимал почему делать те или иные вещи важно, что чувствуют мужчины и женщины при тех или иных событиях и как себя более правильно вести\n- Все будет хорошо, но нужно немного поработать, результат зависит только от тебя"
+            )
+        }
+    }
+
+    private func handleRegisteringFemaleUser(withContext context: Context) {
+        guard let userId = context.fromId else {
+            return
+        }
+
+        let registeredAtTimestamp = Int(Date().timeIntervalSince1970)
+        let userToRegister = User(
+            withId: "\(userId)",
+            gender: .female,
+            registeredAtTimestamp: registeredAtTimestamp
+        )
+
+        _Concurrency.Task {
+            _ = await usersRepository.registerUser(userToRegister)
+
+            bot.sendMessageAsync(
+                chatId: .chat(userId),
+                text: "Приветствую, я буду помогать тебе следить за твоим самочувствием и качеством отношений с твоим мужчиной.\n- Я буду напоминать о ежедневных вещах, на которые нужно обращать внимание, чтобы чувствовать себя хорошо.\n- Я буду проводить опрос о том, хорошо ли прошел твой день, позаботился ли твой мужчина о тебе, беспокоит ли тебя что-то\n- На основании этих опросов мы будем следить прогрессируют ли ваши отношения или ухудшаются, а также отслеживать твое эмоциональное состояние\n- Ты будешь набирать баллы (тактико-технические действия, ТТД, как у Лобановского в футболе)\n- Также я буду периодически присылать обучающий контент, чтобы ты понимала почему делать те или иные вещи важно, что чувствуют мужчины и женщины при тех или иных событиях и как себя более правильно вести\n- Все будет хорошо, но нужно немного поработать, результат зависит только от тебя"
+            )
+        }
+    }
 
     private func handleDailyMorningActivityYesButton(withContext context: Context) {
         guard let userId = context.fromId else {
@@ -1027,6 +1078,8 @@ public final class Bot {
     }
 
     private enum ButtonsIdentifiers {
+        static let registerMaleUser = "registerMaleUser"
+        static let registerFemaleUser = "registerFemaleUser"
         static let dailyReportMorningActivityYes = "dailyReportMorningActivityYes"
         static let dailyReportMorningActivityNo = "dailyReportMorningActivityNo"
         static let dailyReportLunchActivityYes = "dailyReportLunchActivityYes"
