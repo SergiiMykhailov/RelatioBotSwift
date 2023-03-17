@@ -1,6 +1,6 @@
 import SQLite
 
-class SQLiteDefaultConnectionProvider {
+public class SQLiteDefaultConnectionProvider {
 
     // MARK: - Public methods and properties
 

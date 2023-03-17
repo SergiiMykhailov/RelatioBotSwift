@@ -1,4 +1,4 @@
-enum ActivityType : Int {
+public enum ActivityType : Int {
     case unknown = 0
     case dailyMorningActivity = 1
     case dailyLunchActivity = 2
@@ -16,7 +16,7 @@ enum ActivityType : Int {
     ]
 }
 
-final class Activity {
+public final class Activity {
 
     // MARK: - Public methods and properties
 

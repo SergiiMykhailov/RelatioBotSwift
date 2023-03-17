@@ -7,25 +7,23 @@ let package = Package(
        .macOS(.v12)
     ],
     dependencies: [
-        // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
-        .package(
-            url: "https://github.com/nerzh/telegram-vapor-bot",
-            .upToNextMajor(from: "1.0.2")
-        ),
+        .package(name: "TelegramBotSDK", url: "https://github.com/zmeyc/telegram-bot-swift.git", from: "2.0.0"),
         .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
         .package(
             url: "https://github.com/luoxiu/Schedule", .upToNextMajor(from: "2.0.0")
-        )
+        ),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
         .target(
             name: "App",
             dependencies: [
-                .product(name: "Vapor", package: "vapor"),
-                .product(name: "telegram-vapor-bot", package: "telegram-vapor-bot"),
+                .product(name: "TelegramBotSDK", package: "TelegramBotSDK"),
                 .product(name: "SQLite", package: "SQLite.swift"),
-                .product(name: "Schedule", package: "Schedule")
+                .product(name: "Schedule", package: "Schedule"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Logging", package: "swift-log")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
@@ -35,9 +33,5 @@ let package = Package(
             ]
         ),
         .executableTarget(name: "Run", dependencies: [.target(name: "App")]),
-        .testTarget(name: "AppTests", dependencies: [
-            .target(name: "App"),
-            .product(name: "XCTVapor", package: "vapor"),
-        ])
     ]
 )

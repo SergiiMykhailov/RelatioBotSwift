@@ -1,10 +1,10 @@
 import SQLite
 
-class SQLiteUsersRepository {
+public class SQLiteUsersRepository {
 
     // MARK: - Public methods and properties
 
-    init(withConnection connection: Connection) {
+    public init(withConnection connection: Connection) {
         self.connection = connection
     }
 
@@ -47,7 +47,7 @@ class SQLiteUsersRepository {
 
 extension SQLiteUsersRepository : UsersRepository {
 
-    func registerUser(_ user: User) async -> Bool {
+    public func registerUser(_ user: User) async -> Bool {
         let table = setupTableIfNeeded()
 
         do {
@@ -62,7 +62,7 @@ extension SQLiteUsersRepository : UsersRepository {
         }
     }
 
-    func loadUsers() async -> [User] {
+    public func loadUsers() async -> [User] {
         let table = setupTableIfNeeded()
 
         var result = [User]()

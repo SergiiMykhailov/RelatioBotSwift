@@ -1,4 +1,4 @@
-final class User {
+public final class User {
 
     // MARK: - Public methods and properties
 
