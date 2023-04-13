@@ -167,7 +167,7 @@ public final class Bot {
         dailyReportTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
             .at(Constants.surveyTime)
-            .do(queue: .global()) { [weak self] in
+            .do(queue: .main) { [weak self] in
                 self?.handleReport()
         }
     }
@@ -1048,7 +1048,7 @@ public final class Bot {
         static let morningReminderTime = "10:00"
         static let lunchReminderTime = "14:00"
         static let eveningReminderTime = "19:00"
-        static let surveyTime = "22:00"
+        static let surveyTime = "22:35"
 
         static let dailyActivityScore = 1
         static let weeklyActivityScore = 5
