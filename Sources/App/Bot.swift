@@ -19,7 +19,7 @@ public final class Bot {
         self.bot = TelegramBot(token: token)
         self.router = Router(bot: bot)
 
-        var message = "Running build: 1"
+        var message = "Running build: 2"
         if isStaging {
             message += " (staging)"
         }
@@ -1048,7 +1048,7 @@ public final class Bot {
         static let morningReminderTime = "10:00"
         static let lunchReminderTime = "14:00"
         static let eveningReminderTime = "19:00"
-        static let surveyTime = "22:35"
+        static let surveyTime = "18:00"
 
         static let dailyActivityScore = 1
         static let weeklyActivityScore = 5
