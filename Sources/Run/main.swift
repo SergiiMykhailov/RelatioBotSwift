@@ -10,7 +10,7 @@ struct Runner: ParsableCommand {
             return
         }
 
-        let bot = Bot(
+        let bot = RootController(
             withUsersRepository: SQLiteUsersRepository(withConnection: databaseConnection),
             activitiesRepository: SQLiteActivitiesRepository(withConnection: databaseConnection),
             isStaging: isStaging
