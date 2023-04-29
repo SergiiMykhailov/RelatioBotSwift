@@ -26,6 +26,12 @@ public final class RootController {
             activitiesRepository: self.activitiesRepository
         )
 
+        self.femaleController = FemaleController(
+            withBot: self.bot,
+            router: self.router,
+            usersRepository: usersRepository
+        )
+
         setupRoutes()
         setupButtons()
     }
@@ -38,6 +44,7 @@ public final class RootController {
         isRunning = true
 
         maleController.run()
+        femaleController.run()
 
         while let update = bot.nextUpdateSync() {
             _ = try? router.process(update: update)
@@ -308,6 +315,7 @@ public final class RootController {
     private let bot: TelegramBot
     private let router: Router
     private let maleController: MaleController
+    private let femaleController: FemaleController
     private var isRunning = false
 
     private enum Commands {

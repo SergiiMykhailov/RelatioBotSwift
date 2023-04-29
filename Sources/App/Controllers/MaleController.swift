@@ -131,7 +131,7 @@ final class MaleController {
             let registeredUsers = await usersRepository.loadUsers()
 
             for user in registeredUsers {
-                if let chatId = Int64(user.id) {
+                if user.gender == .male, let chatId = Int64(user.id) {
                     action(chatId)
                 }
             }
