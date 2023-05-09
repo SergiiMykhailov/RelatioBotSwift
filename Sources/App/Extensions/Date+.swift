@@ -46,13 +46,13 @@ extension Date {
         return result
     }
 
-    func next(_ weekday: Weekday, considerToday: Bool = false) -> Date {
+    func next(_ weekday: DayOfWeek, considerToday: Bool = false) -> Date {
         return get(.next,
                    weekday,
                    considerToday: considerToday)
     }
 
-    func previous(_ weekday: Weekday, considerToday: Bool = false) -> Date {
+    func previous(_ weekday: DayOfWeek, considerToday: Bool = false) -> Date {
         return get(.previous,
                    weekday,
                    considerToday: considerToday)
@@ -80,7 +80,7 @@ extension Date {
 
     func get(
         _ direction: SearchDirection,
-        _ weekDay: Weekday,
+        _ weekDay: DayOfWeek,
         considerToday consider: Bool = false
     ) -> Date {
         let dayName = weekDay.rawValue
@@ -101,6 +101,16 @@ extension Date {
     }
 }
 
+enum DayOfWeek: String {
+    case monday = "Monday"
+    case tuesday = "Tuesday"
+    case wednesday = "Wednesday"
+    case thursday = "Thursday"
+    case friday = "Friday"
+    case saturday = "Saturday"
+    case sunday = "Sunday"
+}
+
 // MARK: - Helper methods
 extension Date {
     func getWeekDaysInEnglish() -> [String] {
@@ -109,7 +119,7 @@ extension Date {
         return calendar.weekdaySymbols
     }
 
-    var dayOfWeek: Weekday? {
+    var dayOfWeek: DayOfWeek? {
         let calendar = Calendar.current
         let weekDay = calendar.component(Calendar.Component.weekday, from: self)
         let result = Date.dayOfWeek(fromDayIndex: weekDay)
@@ -117,7 +127,7 @@ extension Date {
         return result
     }
 
-    static func dayOfWeek(fromDayIndex dayIndex: Int) -> Weekday? {
+    static func dayOfWeek(fromDayIndex dayIndex: Int) -> DayOfWeek? {
         switch (dayIndex) {
             case 1: return .sunday
             case 2: return .monday
@@ -128,10 +138,6 @@ extension Date {
             case 7: return .saturday
             default: return nil
         }
-    }
-
-    enum Weekday: String {
-        case monday, tuesday, wednesday, thursday, friday, saturday, sunday
     }
 
     enum SearchDirection {
