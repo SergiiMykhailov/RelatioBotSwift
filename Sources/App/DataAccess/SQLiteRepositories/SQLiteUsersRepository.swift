@@ -74,7 +74,7 @@ extension SQLiteUsersRepository : UsersRepository {
 
             try connection.run(
                 table.insert(
-                    or: .rollback,
+                    or: .replace,
                     idColumn <- user.id,
                     registeredAtColumn <- user.registeredAtTimestamp,
                     genderColumn <- genderData
