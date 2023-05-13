@@ -37,7 +37,7 @@ final class FemaleController {
     }
 
     private func setupActivities() {
-        Logger.log("MaleController: Setting up activities")
+        Logger.log("FemaleController: Setting up activities")
 
         morningSetupTask = Plan.every(
             .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
@@ -244,7 +244,7 @@ final class FemaleController {
     // MARK: - Routine
 
     private func handleMorningSetup() {
-        Logger.log("MaleController: handling morning setup")
+        Logger.log("FemaleController: handling morning setup")
 
         guard let today = Date().dayOfWeek,
               let todayRoutine = dailyRoutinesMap[today] else {
