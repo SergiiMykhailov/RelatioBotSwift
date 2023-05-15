@@ -1,5 +1,4 @@
 import TelegramBotSDK
-import Schedule
 import Foundation
 import Logging
 
