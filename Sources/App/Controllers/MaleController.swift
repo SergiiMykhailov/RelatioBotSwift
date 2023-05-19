@@ -1,5 +1,4 @@
 import TelegramBotSDK
-import SwiftCron
 import Foundation
 import Logging
 
