@@ -1,5 +1,5 @@
 import TelegramBotSDK
-import Schedule
+import SwiftCron
 import Foundation
 import Logging
 
@@ -35,12 +35,16 @@ final class MaleController {
     private func setupActivities() {
         Logger.log("MaleController: Setting up activities")
 
-        dailyReportTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.surveyTime)
-            .do(queue: .main) { [weak self] in
+        dailyReportTask = ScheduledTask(
+            schedule: Schedule(
+                time: DateComponents(hour: 18),
+                repeatType: .daily
+            ),
+            taskBlock: { [weak self] in
                 self?.handleReport()
-        }
+            }
+        )
+        dailyReportTask?.start()
     }
 
     private func setupRoutes() {
@@ -719,7 +723,7 @@ final class MaleController {
 
     private var isRunning = false
 
-    private var dailyReportTask: Schedule.Task?
+    private var dailyReportTask: ScheduledTask?
 
     private enum Constants {
         static let morningReminderTime = "10:00"

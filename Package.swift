@@ -9,7 +9,6 @@ let package = Package(
     dependencies: [
         .package(name: "TelegramBotSDK", url: "https://github.com/zmeyc/telegram-bot-swift.git", from: "2.0.0"),
         .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
-        .package(url: "https://github.com/vapor-community/cron.git", from: "1.5.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
@@ -19,7 +18,6 @@ let package = Package(
             dependencies: [
                 .product(name: "TelegramBotSDK", package: "TelegramBotSDK"),
                 .product(name: "SQLite", package: "SQLite.swift"),
-                .product(name: "Cron", package: "cron"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Logging", package: "swift-log")
             ],

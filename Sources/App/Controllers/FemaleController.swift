@@ -1,6 +1,5 @@
 import Foundation
 import TelegramBotSDK
-import Schedule
 import Logging
 
 final class FemaleController {
@@ -39,19 +38,27 @@ final class FemaleController {
     private func setupActivities() {
         Logger.log("FemaleController: Setting up activities")
 
-        morningSetupTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.morningSetupTime)
-            .do(queue: .main) { [weak self] in
+        morningSetupTask = ScheduledTask(
+            schedule: Schedule(
+                time: DateComponents(hour: 8),
+                repeatType: .daily
+            ),
+            taskBlock: { [weak self] in
                 self?.handleMorningSetup()
-        }
+            }
+        )
+        morningSetupTask?.start()
 
-        eveningSurveyTask = Plan.every(
-            .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday)
-            .at(Constants.surveyTime)
-            .do(queue: .main) { [weak self] in
-                self?.handleEveningSurvey()
-        }
+        eveningSurveyTask = ScheduledTask(
+            schedule: Schedule(
+                time: DateComponents(hour: 18),
+                repeatType: .daily
+            ),
+            taskBlock: { [weak self] in
+                self?.handleMorningSetup()
+            }
+        )
+        eveningSurveyTask?.start()
     }
 
     private func setupDailyHandlers() {
@@ -285,15 +292,12 @@ final class FemaleController {
 
     private var isRunning = false
 
-    private var morningSetupTask: Schedule.Task?
-    private var eveningSurveyTask: Schedule.Task?
+    var morningSetupTask: ScheduledTask?
+    var eveningSurveyTask: ScheduledTask?
 
     private var dailyRoutinesMap = [DayOfWeek : FemaleDailyRoutine]()
 
     private enum Constants {
-        static let morningSetupTime = "08:00"
-        static let surveyTime = "18:00"
-
         static let dailyActivityScore = 1
         static let weeklyActivityScore = 5
         static let monthlyActivityScore = 15
