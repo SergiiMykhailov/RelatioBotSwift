@@ -55,7 +55,7 @@ final class FemaleController {
                 repeatType: .daily
             ),
             taskBlock: { [weak self] in
-                self?.handleEveningSurvey()()
+                self?.handleEveningSurvey()
             }
         )
         eveningSurveyTask?.start()
